@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Olist E-Commerce Analytics Dashboard</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0F1117;
+    --surface: #1A1D27;
+    --surface2: #22263A;
+    --border: #2D3148;
+    --accent: #4F8EF7;
+    --accent2: #2DD4A0;
+    --accent3: #F7834F;
+    --accent4: #E25B5B;
+    --text: #E8EAF0;
+    --text2: #8B90A8;
+    --font: 'Inter', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* TOP BAR */
+  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 100; }
+  .topbar-left { display: flex; align-items: center; gap: 16px; }
+  .logo { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--accent); }
+  .logo span { color: var(--text2); }
+  .dataset-badge { font-size: 11px; color: var(--text2); background: var(--surface2); border: 1px solid var(--border); padding: 3px 10px; border-radius: 20px; }
+  .topbar-right { font-family: var(--mono); font-size: 11px; color: var(--text2); }
+
+  /* NAV TABS */
+  .nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; gap: 0; }
+  .nav-tab { font-size: 13px; font-weight: 500; color: var(--text2); padding: 14px 20px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap; }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* PAGES */
+  .page { display: none; padding: 28px 32px 48px; max-width: 1400px; margin: 0 auto; }
+  .page.active { display: block; }
+
+  /* KPI CARDS */
+  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; position: relative; overflow: hidden; }
+  .kpi::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; }
+  .kpi.blue::before { background: var(--accent); }
+  .kpi.green::before { background: var(--accent2); }
+  .kpi.orange::before { background: var(--accent3); }
+  .kpi.red::before { background: var(--accent4); }
+  .kpi-label { font-size: 11px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
+  .kpi-value { font-size: 28px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; line-height: 1; }
+  .kpi-sub { font-size: 12px; color: var(--text2); margin-top: 6px; }
+  .kpi-change { font-size: 12px; font-weight: 500; margin-top: 4px; }
+  .kpi-change.up { color: var(--accent2); }
+  .kpi-change.down { color: var(--accent4); }
+
+  /* CHART CONTAINERS */
+  .chart-grid { display: grid; gap: 16px; margin-bottom: 16px; }
+  .chart-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+  .chart-grid.cols-3 { grid-template-columns: 2fr 1fr; }
+  .chart-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; }
+  .chart-box.full { grid-column: 1 / -1; }
+  .chart-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .chart-sub { font-size: 11px; color: var(--text2); margin-bottom: 16px; }
+  .chart-wrap { position: relative; }
+
+  /* INSIGHT CARDS */
+  .insight-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+  .insight { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
+  .insight-icon { font-size: 18px; margin-bottom: 6px; }
+  .insight-text { font-size: 12px; color: var(--text2); line-height: 1.6; }
+  .insight-text strong { color: var(--text); font-weight: 500; }
+
+  /* SEGMENT CARDS */
+  .segment-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
+  .seg-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }
+  .seg-name { font-size: 12px; font-weight: 600; margin-bottom: 8px; }
+  .seg-count { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+  .seg-pct { font-size: 11px; color: var(--text2); margin-top: 3px; }
+  .seg-rev { font-size: 12px; font-weight: 500; margin-top: 6px; }
+
+  /* TABLE */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .data-table th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text2); border-bottom: 1px solid var(--border); }
+  .data-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surface2); }
+  .rank-badge { font-family: var(--mono); font-size: 11px; color: var(--text2); }
+  .score-bar { display: flex; align-items: center; gap: 8px; }
+  .score-fill { height: 4px; border-radius: 2px; background: var(--accent2); }
+
+  /* DELIVERY TABLE */
+  .delivery-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .delivery-row:last-child { border-bottom: none; }
+  .delivery-state { font-size: 13px; font-weight: 500; }
+  .delivery-bar-wrap { flex: 1; margin: 0 16px; }
+  .delivery-bar { height: 6px; border-radius: 3px; }
+  .delivery-days { font-family: var(--mono); font-size: 12px; color: var(--text2); white-space: nowrap; }
+
+  @media (max-width: 900px) {
+    .kpi-row { grid-template-columns: repeat(2, 1fr); }
+    .chart-grid.cols-2 { grid-template-columns: 1fr; }
+    .chart-grid.cols-3 { grid-template-columns: 1fr; }
+    .segment-grid { grid-template-columns: repeat(3, 1fr); }
+    .insight-row { grid-template-columns: 1fr; }
+    .page { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">olist<span>.analytics</span></div>
+    <div class="dataset-badge">100K orders · 2016–2018 · Brazil</div>
+  </div>
+  <div class="topbar-right">Built by Nischay · B.Tech SRMIST 2026</div>
+</div>
+
+<div class="nav">
+  <div class="nav-tab active" onclick="showPage('executive')">Executive Overview</div>
+  <div class="nav-tab" onclick="showPage('product')">Product & Category</div>
+  <div class="nav-tab" onclick="showPage('seller')">Seller Performance</div>
+  <div class="nav-tab" onclick="showPage('rfm')">RFM Segments</div>
+</div>
+
+<!-- PAGE 1: EXECUTIVE OVERVIEW -->
+<div class="page active" id="page-executive">
+  <div class="kpi-row">
+    <div class="kpi blue">
+      <div class="kpi-label">Total Orders</div>
+      <div class="kpi-value">99,441</div>
+      <div class="kpi-sub">Delivered: 96,478</div>
+      <div class="kpi-change up">↑ 14x growth in 12 months</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">Total Revenue</div>
+      <div class="kpi-value">R$16.0M</div>
+      <div class="kpi-sub">Avg order: R$160.85</div>
+      <div class="kpi-change up">↑ Peak Nov 2017: R$1.19M</div>
+    </div>
+    <div class="kpi orange">
+      <div class="kpi-label">Avg Delivery Time</div>
+      <div class="kpi-value">12.1d</div>
+      <div class="kpi-sub">Fastest: SP 8.7d · Slowest: RR 29.3d</div>
+      <div class="kpi-change up">↓ 11.9d earlier than estimated</div>
+    </div>
+    <div class="kpi red">
+      <div class="kpi-label">Late Deliveries</div>
+      <div class="kpi-value">8.11%</div>
+      <div class="kpi-sub">7,826 of 96,478 orders</div>
+      <div class="kpi-change down">↑ Drives 1-star reviews</div>
+    </div>
+  </div>
+
+  <div class="chart-grid" style="grid-template-columns:1fr">
+    <div class="chart-box">
+      <div class="chart-title">Monthly Order Volume & Revenue Trend</div>
+      <div class="chart-sub">Olist grew 14x in 12 months — Black Friday 2017 was the peak at 7,274 orders</div>
+      <div class="chart-wrap" style="height:280px">
+        <canvas id="chart-monthly"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-grid cols-2">
+    <div class="chart-box">
+      <div class="chart-title">Orders by State (Top 10)</div>
+      <div class="chart-sub">São Paulo alone accounts for 42% of all orders</div>
+      <div class="chart-wrap" style="height:240px">
+        <canvas id="chart-states"></canvas>
+      </div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">Payment Type Distribution</div>
+      <div class="chart-sub">Credit card dominates at 73.9% of all transactions</div>
+      <div class="chart-wrap" style="height:240px">
+        <canvas id="chart-payments"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight-row">
+    <div class="insight">
+      <div class="insight-icon">📈</div>
+      <div class="insight-text"><strong>Hypergrowth phase:</strong> Olist grew from 324 orders in Oct 2016 to 7,274 in Nov 2017 — a 22x increase in 13 months before stabilising.</div>
+    </div>
+    <div class="insight">
+      <div class="insight-icon">🎯</div>
+      <div class="insight-text"><strong>Geographic concentration:</strong> SP + RJ + MG = 67% of all orders. Expansion into northern states could unlock significant untapped demand.</div>
+    </div>
+    <div class="insight">
+      <div class="insight-icon">💳</div>
+      <div class="insight-text"><strong>Payment insight:</strong> 10-installment orders average R$415 vs R$127 for 2 installments — offering more installment options unlocks higher-value purchases.</div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 2: PRODUCT & CATEGORY -->
+<div class="page" id="page-product">
+  <div class="kpi-row">
+    <div class="kpi blue">
+      <div class="kpi-label">Total Categories</div>
+      <div class="kpi-value">71</div>
+      <div class="kpi-sub">Product categories analysed</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">Top Category Revenue</div>
+      <div class="kpi-value">R$1.26M</div>
+      <div class="kpi-sub">beleza_saude (Beauty & Health)</div>
+    </div>
+    <div class="kpi orange">
+      <div class="kpi-label">Worst Rated Category</div>
+      <div class="kpi-value">3.49★</div>
+      <div class="kpi-sub">moveis_escritorio (Office Furniture)</div>
+    </div>
+    <div class="kpi red">
+      <div class="kpi-label">Highest Freight %</div>
+      <div class="kpi-value">54%</div>
+      <div class="kpi-sub">casa_conforto_2 freight vs price</div>
+    </div>
+  </div>
+
+  <div class="chart-grid cols-3">
+    <div class="chart-box">
+      <div class="chart-title">Top 10 Categories by Revenue</div>
+      <div class="chart-sub">Beauty & Health leads — Watches & Gifts has highest avg price at R$201</div>
+      <div class="chart-wrap" style="height:300px">
+        <canvas id="chart-categories"></canvas>
+      </div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">Review Score vs Delivery Days</div>
+      <div class="chart-sub">1-star orders take 2x longer to deliver than 5-star orders</div>
+      <div class="chart-wrap" style="height:300px">
+        <canvas id="chart-delivery-review"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-grid cols-2">
+    <div class="chart-box">
+      <div class="chart-title">Review Score Distribution</div>
+      <div class="chart-sub">Bimodal pattern — customers either love it (57.8%) or hate it (11.5%)</div>
+      <div class="chart-wrap" style="height:220px">
+        <canvas id="chart-reviews"></canvas>
+      </div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">Avg Delivery Days by State</div>
+      <div class="chart-sub">Northern states wait 3x longer than São Paulo customers</div>
+      <div style="margin-top:8px">
+        <div class="delivery-row">
+          <div class="delivery-state">SP</div>
+          <div class="delivery-bar-wrap"><div class="delivery-bar" style="width:30%;background:var(--accent2)"></div></div>
+          <div class="delivery-days">8.7 days</div>
+        </div>
+        <div class="delivery-row">
+          <div class="delivery-state">MG</div>
+          <div class="delivery-bar-wrap"><div class="delivery-bar" style="width:40%;background:var(--accent2)"></div></div>
+          <div class="delivery-days">11.9 days</div>
+        </div>
+        <div class="delivery-row">
+          <div class="delivery-state">RJ</div>
+          <div class="delivery-bar-wrap"><div class="delivery-bar" style="width:44%;background:var(--accent)"></div></div>
+          <div class="delivery-days">15.2 days</div>
+        </div>
+        <div class="delivery-row">
+          <div class="delivery-state">BA</div>
+          <div class="delivery-bar-wrap"><div class="delivery-bar" style="width:56%;background:var(--accent3)"></div></div>
+          <div class="delivery-days">19.3 days</div>
+        </div>
+        <div class="delivery-row">
+          <div class="delivery-state">AM</div>
+          <div class="delivery-bar-wrap"><div class="delivery-bar" style="width:76%;background:var(--accent4)"></div></div>
+          <div class="delivery-days">26.4 days</div>
+        </div>
+        <div class="delivery-row">
+          <div class="delivery-state">RR</div>
+          <div class="delivery-bar-wrap"><div class="delivery-bar" style="width:100%;background:var(--accent4)"></div></div>
+          <div class="delivery-days">29.3 days</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE 3: SELLER PERFORMANCE -->
+<div class="page" id="page-seller">
+  <div class="kpi-row">
+    <div class="kpi blue">
+      <div class="kpi-label">Total Sellers</div>
+      <div class="kpi-value">3,095</div>
+      <div class="kpi-sub">Active on platform</div>
+    </div>
+    <div class="kpi green">
+      <div class="kpi-label">Top Seller Revenue</div>
+      <div class="kpi-value">R$229K</div>
+      <div class="kpi-sub">From 1,156 orders</div>
+    </div>
+    <div class="kpi orange">
+      <div class="kpi-label">Avg Seller Revenue</div>
+      <div class="kpi-value">R$5.2K</div>
+      <div class="kpi-sub">High concentration at top</div>
+    </div>
+    <div class="kpi red">
+      <div class="kpi-label">Top Seller Review</div>
+      <div class="kpi-value">4.82★</div>
+      <div class="kpi-sub">Best quality + volume seller</div>
+    </div>
+  </div>
+
+  <div class="chart-box" style="margin-bottom:16px">
+    <div class="chart-title">Top 15 Sellers by Revenue</div>
+    <div class="chart-sub">Rank 2 seller generates similar revenue to Rank 1 with 65% fewer orders — premium pricing beats volume</div>
+    <div class="chart-wrap" style="height:280px">
+      <canvas id="chart-sellers"></canvas>
+    </div>
+  </div>
+
+  <div class="chart-box">
+    <div class="chart-title">Top Sellers — Revenue vs Review Score</div>
+    <div class="chart-sub">High revenue doesn't guarantee high satisfaction — top earners range from 3.8 to 4.8 stars</div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Seller ID</th>
+          <th>Total Orders</th>
+          <th>Revenue</th>
+          <th>Avg Review</th>
+          <th>Quality Score</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><span class="rank-badge">#1</span></td><td style="font-family:var(--mono);font-size:11px">4869f7a5...b52b2</td><td>1,156</td><td>R$229,472</td><td>4.1★</td><td><div class="score-bar"><div class="score-fill" style="width:82%"></div></div></td></tr>
+        <tr><td><span class="rank-badge">#2</span></td><td style="font-family:var(--mono);font-size:11px">53243585...8905</td><td>410</td><td>R$222,776</td><td>4.3★</td><td><div class="score-bar"><div class="score-fill" style="width:86%"></div></div></td></tr>
+        <tr><td><span class="rank-badge">#3</span></td><td style="font-family:var(--mono);font-size:11px">4a3ca931...884</td><td>1,987</td><td>R$200,472</td><td>3.9★</td><td><div class="score-bar"><div class="score-fill" style="width:78%"></div></div></td></tr>
+        <tr><td><span class="rank-badge">#4</span></td><td style="font-family:var(--mono);font-size:11px">fa1c13f2...a94</td><td>586</td><td>R$194,042</td><td>4.2★</td><td><div class="score-bar"><div class="score-fill" style="width:84%"></div></div></td></tr>
+        <tr><td><span class="rank-badge">#5</span></td><td style="font-family:var(--mono);font-size:11px">7c67e144...ab</td><td>1,364</td><td>R$187,923</td><td>4.0★</td><td><div class="score-bar"><div class="score-fill" style="width:80%"></div></div></td></tr>
+        <tr><td><span class="rank-badge">#6</span></td><td style="font-family:var(--mono);font-size:11px">7e93a43e...53a</td><td>340</td><td>R$176,431</td><td>4.5★</td><td><div class="score-bar"><div class="score-fill" style="width:90%"></div></div></td></tr>
+        <tr><td><span class="rank-badge">#7</span></td><td style="font-family:var(--mono);font-size:11px">da8622b1...84a</td><td>1,551</td><td>R$160,236</td><td>3.8★</td><td><div class="score-bar"><div class="score-fill" style="width:76%"></div></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PAGE 4: RFM SEGMENTS -->
+<div class="page" id="page-rfm">
+  <div class="segment-grid">
+    <div class="seg-card" style="border-color:#4F8EF7">
+      <div class="seg-name" style="color:#4F8EF7">🏆 Champion</div>
+      <div class="seg-count" style="color:#4F8EF7">14,934</div>
+      <div class="seg-pct">15.9% of customers</div>
+      <div class="seg-rev" style="color:#4F8EF7">R$2.64M revenue</div>
+    </div>
+    <div class="seg-card" style="border-color:#2DD4A0">
+      <div class="seg-name" style="color:#2DD4A0">💚 Loyal</div>
+      <div class="seg-count" style="color:#2DD4A0">18,856</div>
+      <div class="seg-pct">20.1% of customers</div>
+      <div class="seg-rev" style="color:#2DD4A0">R$3.04M revenue</div>
+    </div>
+    <div class="seg-card" style="border-color:#A78BFA">
+      <div class="seg-name" style="color:#A78BFA">🆕 New Customer</div>
+      <div class="seg-count" style="color:#A78BFA">15,096</div>
+      <div class="seg-pct">16.1% of customers</div>
+      <div class="seg-rev" style="color:#A78BFA">R$2.47M revenue</div>
+    </div>
+    <div class="seg-card" style="border-color:#F7834F">
+      <div class="seg-name" style="color:#F7834F">⚠️ At Risk</div>
+      <div class="seg-count" style="color:#F7834F">22,224</div>
+      <div class="seg-pct">23.7% of customers</div>
+      <div class="seg-rev" style="color:#F7834F">R$3.71M revenue</div>
+    </div>
+    <div class="seg-card" style="border-color:#E25B5B">
+      <div class="seg-name" style="color:#E25B5B">💀 Lost</div>
+      <div class="seg-count" style="color:#E25B5B">22,247</div>
+      <div class="seg-pct">23.7% of customers</div>
+      <div class="seg-rev" style="color:#E25B5B">R$3.56M revenue</div>
+    </div>
+  </div>
+
+  <div class="chart-grid cols-2">
+    <div class="chart-box">
+      <div class="chart-title">Customer Count by Segment</div>
+      <div class="chart-sub">47% of customers are Lost or At Risk — major retention opportunity</div>
+      <div class="chart-wrap" style="height:260px">
+        <canvas id="chart-rfm-count"></canvas>
+      </div>
+    </div>
+    <div class="chart-box">
+      <div class="chart-title">Revenue by Segment</div>
+      <div class="chart-sub">Champions spend R$177 avg vs R$160 overall — loyalty drives value</div>
+      <div class="chart-wrap" style="height:260px">
+        <canvas id="chart-rfm-revenue"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight-row">
+    <div class="insight">
+      <div class="insight-icon">🎯</div>
+      <div class="insight-text"><strong>Retention crisis:</strong> 97% of customers never made a second purchase. 17,365 Q4 2017 buyers never returned in Q1 2018 — Black Friday brought buyers, not loyal customers.</div>
+    </div>
+    <div class="insight">
+      <div class="insight-icon">💰</div>
+      <div class="insight-text"><strong>At Risk = highest priority:</strong> R$3.71M revenue at risk from 22,224 customers who used to buy but haven't recently. A win-back campaign here has the highest ROI.</div>
+    </div>
+    <div class="insight">
+      <div class="insight-icon">👑</div>
+      <div class="insight-text"><strong>Champion value:</strong> Champions spend 2x the average customer and buy more frequently. A VIP loyalty programme for this segment could significantly increase LTV.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CHART DEFAULTS ─────────────────────────────────────────
+Chart.defaults.color = '#8B90A8';
+Chart.defaults.borderColor = '#2D3148';
+Chart.defaults.font.family = 'Inter';
+Chart.defaults.font.size = 11;
+
+const BLUE = '#4F8EF7';
+const GREEN = '#2DD4A0';
+const ORANGE = '#F7834F';
+const RED = '#E25B5B';
+const PURPLE = '#A78BFA';
+
+// ── PAGE 1: MONTHLY TREND ───────────────────────────────────
+const months = ['2016-09','2016-10','2016-12','2017-01','2017-02','2017-03','2017-04','2017-05','2017-06','2017-07','2017-08','2017-09','2017-10','2017-11','2017-12','2018-01','2018-02','2018-03','2018-04','2018-05','2018-06','2018-07','2018-08'];
+const monthlyOrders = [1,324,26,800,1780,2682,2404,3700,3245,4026,4331,4285,4631,7274,5503,7011,6533,7027,6939,6909,6095,6105,6295];
+const monthlyRevenue = [0.25,59.1,0.02,138.5,291.9,449.9,417.8,592.9,511.3,592.4,674.4,727.8,892.1,1194.9,878.4,1115.0,992.5,1159.7,1160.8,1154.0,1023.9,1066.5,1022.4];
+
+new Chart(document.getElementById('chart-monthly'), {
+  type: 'line',
+  data: {
+    labels: months,
+    datasets: [
+      { label: 'Orders', data: monthlyOrders, borderColor: BLUE, backgroundColor: BLUE+'22', fill: true, tension: 0.3, yAxisID: 'y', pointRadius: 3 },
+      { label: 'Revenue (R$ K)', data: monthlyRevenue, borderColor: GREEN, backgroundColor: 'transparent', tension: 0.3, yAxisID: 'y2', pointRadius: 3 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: { legend: { position: 'top' } },
+    scales: {
+      x: { grid: { color: '#2D3148' }, ticks: { maxRotation: 45, font: { size: 10 } } },
+      y: { grid: { color: '#2D3148' }, position: 'left', title: { display: true, text: 'Orders' } },
+      y2: { grid: { display: false }, position: 'right', title: { display: true, text: 'Revenue (R$ K)' } }
+    }
+  }
+});
+
+// States chart
+new Chart(document.getElementById('chart-states'), {
+  type: 'bar',
+  data: {
+    labels: ['SP','MG','RJ','RS','PR','SC','BA','DF','ES','GO'],
+    datasets: [{ label: 'Orders', data: [41746,11635,12852,5466,5045,3637,3380,2140,2033,2020], backgroundColor: [BLUE,BLUE+'CC',BLUE+'AA',BLUE+'88',BLUE+'88',BLUE+'77',BLUE+'77',BLUE+'66',BLUE+'66',BLUE+'66'] }]
+  },
+  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#2D3148' } } } }
+});
+
+// Payments pie
+new Chart(document.getElementById('chart-payments'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Credit Card', 'Boleto', 'Voucher', 'Debit Card'],
+    datasets: [{ data: [76795,19784,5775,1529], backgroundColor: [BLUE, GREEN, ORANGE, PURPLE], borderWidth: 0, hoverOffset: 8 }]
+  },
+  options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom' } } }
+});
+
+// ── PAGE 2: CATEGORIES ──────────────────────────────────────
+new Chart(document.getElementById('chart-categories'), {
+  type: 'bar',
+  data: {
+    labels: ['beleza_saude','relogios_presentes','cama_mesa_banho','esporte_lazer','informatica_acess','moveis_decoracao','cool_stuff','utilidades_dom','automotivo','ferramentas_jardim'],
+    datasets: [{ label: 'Revenue (R$)', data: [1258681,1205005,1036988,988049,911954,729762,635290,632248,592720,485256], backgroundColor: BLUE+'CC' }]
+  },
+  options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#2D3148' } }, y: { grid: { display: false }, ticks: { font: { size: 10 } } } } }
+});
+
+// Delivery vs review
+new Chart(document.getElementById('chart-delivery-review'), {
+  type: 'bar',
+  data: {
+    labels: ['1★','2★','3★','4★','5★'],
+    datasets: [{ label: 'Avg Delivery Days', data: [20.8,16.2,13.8,11.8,10.2], backgroundColor: [RED, ORANGE+'AA', ORANGE, GREEN+'AA', GREEN] }]
+  },
+  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#2D3148' }, min: 0, max: 25 } } }
+});
+
+// Reviews
+new Chart(document.getElementById('chart-reviews'), {
+  type: 'bar',
+  data: {
+    labels: ['1★','2★','3★','4★','5★'],
+    datasets: [{ data: [11424,3151,8179,19142,57328], backgroundColor: [RED,ORANGE+'AA',ORANGE,GREEN+'AA',GREEN] }]
+  },
+  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#2D3148' } } } }
+});
+
+// ── PAGE 3: SELLERS ─────────────────────────────────────────
+new Chart(document.getElementById('chart-sellers'), {
+  type: 'bar',
+  data: {
+    labels: ['#1','#2','#3','#4','#5','#6','#7','#8','#9','#10','#11','#12','#13','#14','#15'],
+    datasets: [{ label: 'Revenue (R$)', data: [229472,222776,200472,194042,187923,176431,160236,141745,138968,135171,128111,123304,118443,113985,109234], backgroundColor: BLUE+'CC' }]
+  },
+  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#2D3148' } } } }
+});
+
+// ── PAGE 4: RFM ─────────────────────────────────────────────
+new Chart(document.getElementById('chart-rfm-count'), {
+  type: 'doughnut',
+  data: {
+    labels: ['Champion','Loyal','New Customer','At Risk','Lost'],
+    datasets: [{ data: [14934,18856,15096,22224,22247], backgroundColor: [BLUE,GREEN,PURPLE,ORANGE,RED], borderWidth: 0, hoverOffset: 8 }]
+  },
+  options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom' } } }
+});
+
+new Chart(document.getElementById('chart-rfm-revenue'), {
+  type: 'bar',
+  data: {
+    labels: ['At Risk','Lost','Loyal','Champion','New Customer'],
+    datasets: [{ label: 'Revenue (R$)', data: [3708095,3561753,3037000,2644373,2471000], backgroundColor: [ORANGE,RED,GREEN,BLUE,PURPLE] }]
+  },
+  options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#2D3148' } }, y: { grid: { display: false } } } }
+});
+
+// ── PAGE SWITCHING ──────────────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>
