@@ -1,546 +1,728 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Olist E-Commerce Analytics Dashboard</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Olist Retention Review</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500&display=swap">
 <style>
-  :root {
-    --bg: #0F1117;
-    --surface: #1A1D27;
-    --surface2: #22263A;
-    --border: #2D3148;
-    --accent: #4F8EF7;
-    --accent2: #2DD4A0;
-    --accent3: #F7834F;
-    --accent4: #E25B5B;
-    --text: #E8EAF0;
-    --text2: #8B90A8;
-    --font: 'Inter', sans-serif;
-    --mono: 'JetBrains Mono', monospace;
+/* Layout: a consulting-style business review. Dark petrol hero carries the thesis
+   (97% never return) as a 100-square waffle; a sticky section nav; each finding is a
+   two-column spread (argument left, exhibit right); recommendations close it out. */
+:root {
+  --bg: #f2f5f4;
+  --surface: #ffffff;
+  --ink: #0e1d22;
+  --ink-2: #44575d;
+  --muted: #74858a;
+  --grid: #e3e8e8;
+  --axis: #c3cccd;
+  --line: rgba(14,29,34,0.10);
+  --hero: #0c2b33;
+  --hero-2: #12404a;
+  --hero-ink: #eef5f5;
+  --hero-muted: #9db6bb;
+  --hero-line: rgba(238,245,245,0.14);
+  --gold: #f2b632;
+  --accent: #2a78d6;
+  --accent-wash: rgba(42,120,214,0.10);
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+  --critical: #d03b3b;
+  --critical-wash: rgba(208,59,59,0.09);
+  --q0: #cde2fb; --q1: #9ec5f4; --q2: #5598e7; --q3: #256abf; --q4: #104281;
+  --qi0: #0e1d22; --qi1: #0e1d22; --qi2: #ffffff; --qi3: #ffffff; --qi4: #ffffff;
+  --empty: #e6eaea;
+  --font-display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0a1215; --surface: #101b1f; --ink: #e8f0f1; --ink-2: #b2c2c5; --muted: #7f9398;
+    --grid: #1e2b2f; --axis: #33454a; --line: rgba(255,255,255,0.09);
+    --hero: #0b252c; --hero-2: #10363f; --hero-ink: #eef5f5; --hero-muted: #93adb2; --hero-line: rgba(238,245,245,0.12);
+    --gold: #f2b632; --accent: #3987e5; --accent-wash: rgba(57,135,229,0.16);
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+    --critical: #e06060; --critical-wash: rgba(224,96,96,0.14);
+    --q0: #183553; --q1: #1d4f8a; --q2: #2f74c9; --q3: #6aa6ec; --q4: #b7d3f6;
+    --qi0: #e8f0f1; --qi1: #e8f0f1; --qi2: #ffffff; --qi3: #0e1d22; --qi4: #0e1d22;
+    --empty: #1a2629;
+    color-scheme: dark;
   }
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
+}
+:root[data-theme="dark"] {
+  --bg: #0a1215; --surface: #101b1f; --ink: #e8f0f1; --ink-2: #b2c2c5; --muted: #7f9398;
+  --grid: #1e2b2f; --axis: #33454a; --line: rgba(255,255,255,0.09);
+  --hero: #0b252c; --hero-2: #10363f; --hero-ink: #eef5f5; --hero-muted: #93adb2; --hero-line: rgba(238,245,245,0.12);
+  --gold: #f2b632; --accent: #3987e5; --accent-wash: rgba(57,135,229,0.16);
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+  --critical: #e06060; --critical-wash: rgba(224,96,96,0.14);
+  --q0: #183553; --q1: #1d4f8a; --q2: #2f74c9; --q3: #6aa6ec; --q4: #b7d3f6;
+  --qi0: #e8f0f1; --qi1: #e8f0f1; --qi2: #ffffff; --qi3: #0e1d22; --qi4: #0e1d22;
+  --empty: #1a2629;
+  color-scheme: dark;
+}
 
-  /* TOP BAR */
-  .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; align-items: center; justify-content: space-between; height: 56px; position: sticky; top: 0; z-index: 100; }
-  .topbar-left { display: flex; align-items: center; gap: 16px; }
-  .logo { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--accent); }
-  .logo span { color: var(--text2); }
-  .dataset-badge { font-size: 11px; color: var(--text2); background: var(--surface2); border: 1px solid var(--border); padding: 3px 10px; border-radius: 20px; }
-  .topbar-right { font-family: var(--mono); font-size: 11px; color: var(--text2); }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.6; }
+.inner { max-width: 1160px; margin: 0 auto; padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+h1, h2 { font-family: var(--font-display); margin: 0; text-wrap: balance; }
+p { margin: 0; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.num { font-variant-numeric: tabular-nums; }
+.mono { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; }
 
-  /* NAV TABS */
-  .nav { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; display: flex; gap: 0; }
-  .nav-tab { font-size: 13px; font-weight: 500; color: var(--text2); padding: 14px 20px; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap; }
-  .nav-tab:hover { color: var(--text); }
-  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+/* ---------- Hero ---------- */
+.hero { background: radial-gradient(120% 140% at 85% 0%, var(--hero-2) 0%, var(--hero) 55%); color: var(--hero-ink); }
+.hero .inner { padding-block: 48px 0; display: grid; gap: 40px; }
+.hero-top { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 48px; align-items: center; }
+.hero .kicker { color: var(--hero-muted); display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.hero .kicker span + span::before { content: "/"; margin-right: 14px; opacity: .5; }
+.hero h1 { font-size: clamp(36px, 6vw, 68px); line-height: 0.98; font-weight: 800; letter-spacing: -0.03em; margin-top: 18px; }
+.hero h1 em { font-style: normal; color: var(--gold); }
+.hero .lede { margin-top: 20px; font-size: 17px; color: var(--hero-muted); max-width: 52ch; }
+.hero .lede b { color: var(--hero-ink); font-weight: 600; }
+.byline { margin-top: 22px; display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 13px; color: var(--hero-muted); }
+.byline a { color: var(--hero-ink); text-underline-offset: 3px; }
 
-  /* PAGES */
-  .page { display: none; padding: 28px 32px 48px; max-width: 1400px; margin: 0 auto; }
-  .page.active { display: block; }
+.waffle-card { justify-self: end; width: 100%; max-width: 380px; display: grid; gap: 14px; }
+.waffle { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; }
+.waffle i { aspect-ratio: 1; border-radius: 3px; background: var(--hero-line); }
+.waffle i.on { background: var(--gold); box-shadow: 0 0 0 1px rgba(242,182,50,.35), 0 0 14px rgba(242,182,50,.35); }
+.waffle-key { display: flex; justify-content: space-between; gap: 12px; font-size: 13px; color: var(--hero-muted); }
+.waffle-key b { display: block; font-family: var(--font-display); font-size: 30px; line-height: 1.1; font-weight: 700; color: var(--hero-ink); }
+.waffle-key .gold b { color: var(--gold); }
+.waffle-key i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; background: var(--hero-line); vertical-align: 0; }
+.waffle-key .gold i { background: var(--gold); }
 
-  /* KPI CARDS */
-  .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; position: relative; overflow: hidden; }
-  .kpi::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; }
-  .kpi.blue::before { background: var(--accent); }
-  .kpi.green::before { background: var(--accent2); }
-  .kpi.orange::before { background: var(--accent3); }
-  .kpi.red::before { background: var(--accent4); }
-  .kpi-label { font-size: 11px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
-  .kpi-value { font-size: 28px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; line-height: 1; }
-  .kpi-sub { font-size: 12px; color: var(--text2); margin-top: 6px; }
-  .kpi-change { font-size: 12px; font-weight: 500; margin-top: 4px; }
-  .kpi-change.up { color: var(--accent2); }
-  .kpi-change.down { color: var(--accent4); }
+.kpis { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); border-top: 1px solid var(--hero-line); }
+.kpi { padding: 18px 16px 22px; border-left: 1px solid var(--hero-line); display: grid; gap: 2px; min-width: 0; }
+.kpi:first-child { border-left: 0; padding-left: 0; }
+.kpi .label { color: var(--hero-muted); }
+.kpi .value { font-family: var(--font-display); font-size: 28px; font-weight: 700; line-height: 1.2; letter-spacing: -0.01em; }
+.kpi .note { font-size: 12px; color: var(--hero-muted); }
 
-  /* CHART CONTAINERS */
-  .chart-grid { display: grid; gap: 16px; margin-bottom: 16px; }
-  .chart-grid.cols-2 { grid-template-columns: 1fr 1fr; }
-  .chart-grid.cols-3 { grid-template-columns: 2fr 1fr; }
-  .chart-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; }
-  .chart-box.full { grid-column: 1 / -1; }
-  .chart-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
-  .chart-sub { font-size: 11px; color: var(--text2); margin-bottom: 16px; }
-  .chart-wrap { position: relative; }
+/* ---------- Sticky nav ---------- */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+.nav .inner { display: flex; gap: 4px; overflow-x: auto; padding-block: 10px; scrollbar-width: none; }
+.nav .inner::-webkit-scrollbar { display: none; }
+.nav a { flex: none; text-decoration: none; color: var(--ink-2); font-size: 13px; font-weight: 500; padding: 6px 12px; border-radius: 999px; }
+.nav a span { font-family: var(--font-mono); font-size: 11px; color: var(--muted); margin-right: 6px; }
+.nav a:hover { background: var(--accent-wash); color: var(--ink); }
+.nav a.active { background: var(--ink); color: var(--bg); }
+.nav a.active span { color: inherit; opacity: .6; }
 
-  /* INSIGHT CARDS */
-  .insight-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
-  .insight { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 14px 16px; }
-  .insight-icon { font-size: 18px; margin-bottom: 6px; }
-  .insight-text { font-size: 12px; color: var(--text2); line-height: 1.6; }
-  .insight-text strong { color: var(--text); font-weight: 500; }
+/* ---------- Sections ---------- */
+main .inner { display: grid; gap: 0; padding-block: 12px 64px; }
+.section { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.6fr); gap: 40px; padding-block: 52px; border-bottom: 1px solid var(--line); scroll-margin-top: 60px; }
+.section.stack { grid-template-columns: minmax(0, 1fr); gap: 28px; }
+.argument { display: grid; gap: 16px; align-content: start; }
+.argument .tag { color: var(--accent); display: flex; align-items: center; gap: 10px; }
+.argument .tag::after { content: ""; height: 1px; flex: 1; max-width: 48px; background: currentColor; opacity: .4; }
+.argument h2 { font-size: clamp(24px, 2.6vw, 30px); line-height: 1.12; font-weight: 700; letter-spacing: -0.02em; }
+.argument p { color: var(--ink-2); max-width: 58ch; }
+.argument.wide { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 40px; align-items: end; }
+.argument.wide .tag, .argument.wide h2 { grid-column: 1; }
+.argument.wide p { grid-column: 2; grid-row: 1 / span 2; align-self: end; }
 
-  /* SEGMENT CARDS */
-  .segment-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 20px; }
-  .seg-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; text-align: center; }
-  .seg-name { font-size: 12px; font-weight: 600; margin-bottom: 8px; }
-  .seg-count { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
-  .seg-pct { font-size: 11px; color: var(--text2); margin-top: 3px; }
-  .seg-rev { font-size: 12px; font-weight: 500; margin-top: 6px; }
+.exhibit { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 22px; display: grid; gap: 16px; align-content: start; min-width: 0; box-shadow: 0 1px 2px rgba(14,29,34,.04), 0 8px 24px -16px rgba(14,29,34,.18); }
+.exhibit-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.exhibit-head .t { font-size: 13px; font-weight: 600; color: var(--ink); }
+.exhibit-head .t small { display: block; font-weight: 400; color: var(--muted); font-size: 12px; }
 
-  /* TABLE */
-  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .data-table th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text2); border-bottom: 1px solid var(--border); }
-  .data-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); color: var(--text); }
-  .data-table tr:last-child td { border-bottom: none; }
-  .data-table tr:hover td { background: var(--surface2); }
-  .rank-badge { font-family: var(--mono); font-size: 11px; color: var(--text2); }
-  .score-bar { display: flex; align-items: center; gap: 8px; }
-  .score-fill { height: 4px; border-radius: 2px; background: var(--accent2); }
+.stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0; border-top: 1px solid var(--line); }
+.stat { padding: 14px 14px 14px 0; border-bottom: 1px solid var(--line); display: grid; gap: 2px; }
+.stat:nth-child(even) { padding-left: 14px; border-left: 1px solid var(--line); }
+.stat b { font-family: var(--font-display); font-size: 26px; font-weight: 700; line-height: 1.15; letter-spacing: -0.01em; }
+.stat span { font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+.stat.bad b { color: var(--critical); }
 
-  /* DELIVERY TABLE */
-  .delivery-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
-  .delivery-row:last-child { border-bottom: none; }
-  .delivery-state { font-size: 13px; font-weight: 500; }
-  .delivery-bar-wrap { flex: 1; margin: 0 16px; }
-  .delivery-bar { height: 6px; border-radius: 3px; }
-  .delivery-days { font-family: var(--mono); font-size: 12px; color: var(--text2); white-space: nowrap; }
+/* Segmented control */
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; background: var(--bg); }
+.seg button { font: inherit; font-size: 12.5px; border: 0; background: transparent; color: var(--ink-2); padding: 5px 12px; border-radius: 999px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: 0 1px 2px rgba(14,29,34,.12), 0 0 0 1px var(--line); font-weight: 600; }
 
-  @media (max-width: 900px) {
-    .kpi-row { grid-template-columns: repeat(2, 1fr); }
-    .chart-grid.cols-2 { grid-template-columns: 1fr; }
-    .chart-grid.cols-3 { grid-template-columns: 1fr; }
-    .segment-grid { grid-template-columns: repeat(3, 1fr); }
-    .insight-row { grid-template-columns: 1fr; }
-    .page { padding: 16px; }
-  }
+/* Charts */
+.chart { position: relative; width: 100%; min-width: 0; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart text { font-family: var(--font-body); font-size: 11px; fill: var(--muted); }
+.chart .val { fill: var(--ink); font-weight: 600; font-size: 12px; }
+.chart .ref { fill: var(--ink-2); font-size: 11px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 12.5px; color: var(--ink-2); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+
+/* Tables */
+.tablebox { overflow-x: auto; margin-inline: -4px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: right; font-weight: 500; color: var(--muted); font-size: 11.5px; padding: 6px 8px; border-bottom: 1px solid var(--axis); white-space: nowrap; }
+td { text-align: right; padding: 9px 8px; border-bottom: 1px solid var(--grid); font-variant-numeric: tabular-nums; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+th:first-child, td:first-child { text-align: left; }
+td.barcell { width: 34%; min-width: 130px; }
+.cellbar { display: flex; align-items: center; gap: 8px; }
+.cellbar span { height: 8px; background: var(--accent); border-radius: 0 3px 3px 0; display: block; }
+.cellbar em { font-style: normal; min-width: 54px; text-align: left; color: var(--ink-2); }
+tr.hl td { background: var(--critical-wash); }
+tr.hl td:first-child { box-shadow: inset 3px 0 0 var(--critical); }
+.pill { display: inline-flex; align-items: center; gap: 4px; font-size: 10.5px; font-weight: 600; padding: 1px 7px; border-radius: 999px; color: var(--critical); background: var(--critical-wash); margin-left: 8px; vertical-align: 1px; }
+.pill svg { width: 10px; height: 10px; }
+.late-hi { color: var(--critical); font-weight: 600; }
+details { font-size: 13px; color: var(--ink-2); }
+details summary { cursor: pointer; color: var(--accent); width: fit-content; font-weight: 500; }
+details .tablebox { margin-top: 10px; max-height: 280px; overflow: auto; }
+
+/* Brazil tile map */
+.regions { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 28px; align-items: start; }
+.tilemap { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: repeat(8, auto); gap: 4px; max-width: 400px; width: 100%; }
+.tile { aspect-ratio: 1; border-radius: 6px; display: grid; place-content: center; text-align: center; line-height: 1.1; cursor: default; transition: transform .12s; }
+.tile b { font-size: 12px; font-weight: 700; letter-spacing: .02em; }
+.tile small { font-size: 9.5px; opacity: .85; font-variant-numeric: tabular-nums; }
+.tile:hover { transform: scale(1.08); box-shadow: 0 0 0 2px var(--surface), 0 0 0 4px var(--ink); position: relative; z-index: 1; }
+@media (prefers-reduced-motion: reduce) { .tile { transition: none; } }
+.ramp { display: grid; gap: 6px; font-size: 11.5px; color: var(--muted); max-width: 400px; }
+.ramp .bins { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; }
+.ramp .bins i { height: 10px; }
+.ramp .bins i:first-child { border-radius: 3px 0 0 3px; }
+.ramp .bins i:last-child { border-radius: 0 3px 3px 0; }
+.ramp .ends { display: flex; justify-content: space-between; }
+
+/* Mix */
+.mix { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 24px; }
+.hbars { display: grid; gap: 7px; }
+.hbar { display: grid; grid-template-columns: minmax(92px, 150px) minmax(0, 1fr) 64px; gap: 10px; align-items: center; font-size: 13px; }
+.hbar .name { color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hbar .track { height: 12px; position: relative; }
+.hbar .fill { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 0 4px 4px 0; }
+.hbar .v { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); }
+.hbar:hover .name { color: var(--ink); }
+.hbar:hover .fill { filter: brightness(1.12); }
+.stackbar { display: flex; gap: 2px; height: 26px; }
+.stackbar div { min-width: 3px; }
+.stackbar div:first-child { border-radius: 5px 0 0 5px; }
+.stackbar div:last-child { border-radius: 0 5px 5px 0; }
+.paylist { display: grid; gap: 0; }
+.payrow { display: grid; grid-template-columns: 12px minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--grid); font-size: 13px; }
+.payrow:last-child { border-bottom: 0; }
+.payrow i { width: 10px; height: 10px; border-radius: 2px; }
+.payrow .amt { color: var(--muted); font-variant-numeric: tabular-nums; }
+.payrow .pct { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 48px; text-align: right; }
+.note { font-size: 12px; color: var(--muted); }
+
+/* Actions */
+.actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.action { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 22px; display: grid; grid-template-rows: auto auto 1fr auto; gap: 12px; min-width: 0; position: relative; overflow: hidden; }
+.action .n { font-family: var(--font-display); font-size: 44px; font-weight: 800; line-height: 1; color: var(--accent); letter-spacing: -0.04em; }
+.action h2 { font-size: 20px; line-height: 1.2; font-weight: 700; letter-spacing: -0.01em; }
+.action p { font-size: 14px; color: var(--ink-2); }
+.action dl { margin: 0; display: grid; gap: 8px; border-top: 1px solid var(--line); padding-top: 12px; font-size: 13px; }
+.action dt { color: var(--muted); }
+.action dd { margin: 0; color: var(--ink); font-weight: 500; }
+.action dl div { display: grid; gap: 1px; }
+
+.method { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.6fr); gap: 40px; padding-block: 44px 0; font-size: 13px; color: var(--ink-2); }
+.method ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.method .tag { color: var(--muted); }
+
+/* Tooltip */
+#tip { position: fixed; z-index: 30; pointer-events: none; background: var(--ink); color: var(--bg); font-size: 12px; line-height: 1.45; padding: 8px 11px; border-radius: 8px; max-width: 250px; opacity: 0; transition: opacity .08s; box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+#tip b { display: block; font-weight: 600; margin-bottom: 1px; }
+@media (prefers-reduced-motion: reduce) { #tip { transition: none; } }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 980px) {
+  .kpis { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .kpi:nth-child(4) { border-left: 0; padding-left: 0; }
+  .kpi:nth-child(n+4) { border-top: 1px solid var(--hero-line); }
+  .section { grid-template-columns: minmax(0, 1fr); gap: 24px; padding-block: 40px; }
+  .argument.wide { grid-template-columns: minmax(0, 1fr); }
+  .argument.wide p { grid-column: 1; grid-row: auto; }
+  .actions { grid-template-columns: minmax(0, 1fr); }
+  .method { grid-template-columns: minmax(0, 1fr); gap: 12px; }
+}
+@media (max-width: 820px) {
+  .hero-top { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .waffle-card { justify-self: start; max-width: 340px; }
+  .regions, .mix { grid-template-columns: minmax(0, 1fr); }
+  .tilemap, .ramp { max-width: 360px; }
+}
+@media (max-width: 520px) {
+  .hero .inner { padding-block: 32px 0; }
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpi { padding-left: 14px; border-left: 1px solid var(--hero-line); }
+  .kpi:nth-child(odd) { border-left: 0; padding-left: 0; }
+  .kpi:nth-child(n+3) { border-top: 1px solid var(--hero-line); }
+  .kpi .value { font-size: 23px; }
+  .exhibit { padding: 16px; }
+  .stat b { font-size: 22px; }
+  .tile b { font-size: 11px; }
+  .tile small { display: none; }
+}
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div class="topbar-left">
-    <div class="logo">olist<span>.analytics</span></div>
-    <div class="dataset-badge">100K orders · 2016–2018 · Brazil</div>
-  </div>
-  <div class="topbar-right">Built by Nischay · B.Tech SRMIST 2026</div>
-</div>
 
-<div class="nav">
-  <div class="nav-tab active" onclick="showPage('executive')">Executive Overview</div>
-  <div class="nav-tab" onclick="showPage('product')">Product & Category</div>
-  <div class="nav-tab" onclick="showPage('seller')">Seller Performance</div>
-  <div class="nav-tab" onclick="showPage('rfm')">RFM Segments</div>
-</div>
-
-<!-- PAGE 1: EXECUTIVE OVERVIEW -->
-<div class="page active" id="page-executive">
-  <div class="kpi-row">
-    <div class="kpi blue">
-      <div class="kpi-label">Total Orders</div>
-      <div class="kpi-value">99,441</div>
-      <div class="kpi-sub">Delivered: 96,478</div>
-      <div class="kpi-change up">↑ 14x growth in 12 months</div>
-    </div>
-    <div class="kpi green">
-      <div class="kpi-label">Total Revenue</div>
-      <div class="kpi-value">R$16.0M</div>
-      <div class="kpi-sub">Avg order: R$160.85</div>
-      <div class="kpi-change up">↑ Peak Nov 2017: R$1.19M</div>
-    </div>
-    <div class="kpi orange">
-      <div class="kpi-label">Avg Delivery Time</div>
-      <div class="kpi-value">12.1d</div>
-      <div class="kpi-sub">Fastest: SP 8.7d · Slowest: RR 29.3d</div>
-      <div class="kpi-change up">↓ 11.9d earlier than estimated</div>
-    </div>
-    <div class="kpi red">
-      <div class="kpi-label">Late Deliveries</div>
-      <div class="kpi-value">8.11%</div>
-      <div class="kpi-sub">7,826 of 96,478 orders</div>
-      <div class="kpi-change down">↑ Drives 1-star reviews</div>
-    </div>
-  </div>
-
-  <div class="chart-grid" style="grid-template-columns:1fr">
-    <div class="chart-box">
-      <div class="chart-title">Monthly Order Volume & Revenue Trend</div>
-      <div class="chart-sub">Olist grew 14x in 12 months — Black Friday 2017 was the peak at 7,274 orders</div>
-      <div class="chart-wrap" style="height:280px">
-        <canvas id="chart-monthly"></canvas>
+<header class="hero">
+  <div class="inner">
+    <div class="hero-top">
+      <div>
+        <div class="kicker mono"><span>Olist marketplace</span><span>Brazil</span><span>Sep 2016 – Aug 2018</span></div>
+        <h1>One order,<br>then <em>gone.</em></h1>
+        <p class="lede" id="lede"></p>
+        <div class="byline"><span>Analysis by <b style="color:var(--hero-ink);font-weight:600">Nischay Vats</b></span><span>SQL · Python · pandas</span><a href="https://github.com/nischayvats" target="_blank" rel="noopener">github.com/nischayvats</a></div>
+      </div>
+      <div class="waffle-card" aria-label="Out of every 100 customers, 97 ordered once and 3 came back">
+        <div class="waffle" id="waffle" aria-hidden="true"></div>
+        <div class="waffle-key" id="waffle-key"></div>
       </div>
     </div>
+    <div class="kpis" id="kpis" aria-label="Headline metrics"></div>
   </div>
+</header>
 
-  <div class="chart-grid cols-2">
-    <div class="chart-box">
-      <div class="chart-title">Orders by State (Top 10)</div>
-      <div class="chart-sub">São Paulo alone accounts for 42% of all orders</div>
-      <div class="chart-wrap" style="height:240px">
-        <canvas id="chart-states"></canvas>
-      </div>
-    </div>
-    <div class="chart-box">
-      <div class="chart-title">Payment Type Distribution</div>
-      <div class="chart-sub">Credit card dominates at 73.9% of all transactions</div>
-      <div class="chart-wrap" style="height:240px">
-        <canvas id="chart-payments"></canvas>
-      </div>
-    </div>
+<nav class="nav" aria-label="Sections">
+  <div class="inner" id="navlinks">
+    <a href="#growth"><span>01</span>Growth</a>
+    <a href="#delivery"><span>02</span>Delivery</a>
+    <a href="#retention"><span>03</span>Retention</a>
+    <a href="#regions"><span>04</span>Regions</a>
+    <a href="#mix"><span>05</span>Category &amp; payment</a>
+    <a href="#actions"><span>06</span>Recommendations</a>
   </div>
+</nav>
 
-  <div class="insight-row">
-    <div class="insight">
-      <div class="insight-icon">📈</div>
-      <div class="insight-text"><strong>Hypergrowth phase:</strong> Olist grew from 324 orders in Oct 2016 to 7,274 in Nov 2017 — a 22x increase in 13 months before stabilising.</div>
-    </div>
-    <div class="insight">
-      <div class="insight-icon">🎯</div>
-      <div class="insight-text"><strong>Geographic concentration:</strong> SP + RJ + MG = 67% of all orders. Expansion into northern states could unlock significant untapped demand.</div>
-    </div>
-    <div class="insight">
-      <div class="insight-icon">💳</div>
-      <div class="insight-text"><strong>Payment insight:</strong> 10-installment orders average R$415 vs R$127 for 2 installments — offering more installment options unlocks higher-value purchases.</div>
-    </div>
-  </div>
-</div>
-
-<!-- PAGE 2: PRODUCT & CATEGORY -->
-<div class="page" id="page-product">
-  <div class="kpi-row">
-    <div class="kpi blue">
-      <div class="kpi-label">Total Categories</div>
-      <div class="kpi-value">71</div>
-      <div class="kpi-sub">Product categories analysed</div>
-    </div>
-    <div class="kpi green">
-      <div class="kpi-label">Top Category Revenue</div>
-      <div class="kpi-value">R$1.26M</div>
-      <div class="kpi-sub">beleza_saude (Beauty & Health)</div>
-    </div>
-    <div class="kpi orange">
-      <div class="kpi-label">Worst Rated Category</div>
-      <div class="kpi-value">3.49★</div>
-      <div class="kpi-sub">moveis_escritorio (Office Furniture)</div>
-    </div>
-    <div class="kpi red">
-      <div class="kpi-label">Highest Freight %</div>
-      <div class="kpi-value">54%</div>
-      <div class="kpi-sub">casa_conforto_2 freight vs price</div>
-    </div>
-  </div>
-
-  <div class="chart-grid cols-3">
-    <div class="chart-box">
-      <div class="chart-title">Top 10 Categories by Revenue</div>
-      <div class="chart-sub">Beauty & Health leads — Watches & Gifts has highest avg price at R$201</div>
-      <div class="chart-wrap" style="height:300px">
-        <canvas id="chart-categories"></canvas>
+<main>
+  <div class="inner">
+    <section class="section" id="growth">
+      <div class="argument">
+        <div class="tag mono">01 · Growth</div>
+        <h2 id="growth-h"></h2>
+        <p id="growth-p"></p>
       </div>
-    </div>
-    <div class="chart-box">
-      <div class="chart-title">Review Score vs Delivery Days</div>
-      <div class="chart-sub">1-star orders take 2x longer to deliver than 5-star orders</div>
-      <div class="chart-wrap" style="height:300px">
-        <canvas id="chart-delivery-review"></canvas>
-      </div>
-    </div>
-  </div>
-
-  <div class="chart-grid cols-2">
-    <div class="chart-box">
-      <div class="chart-title">Review Score Distribution</div>
-      <div class="chart-sub">Bimodal pattern — customers either love it (57.8%) or hate it (11.5%)</div>
-      <div class="chart-wrap" style="height:220px">
-        <canvas id="chart-reviews"></canvas>
-      </div>
-    </div>
-    <div class="chart-box">
-      <div class="chart-title">Avg Delivery Days by State</div>
-      <div class="chart-sub">Northern states wait 3x longer than São Paulo customers</div>
-      <div style="margin-top:8px">
-        <div class="delivery-row">
-          <div class="delivery-state">SP</div>
-          <div class="delivery-bar-wrap"><div class="delivery-bar" style="width:30%;background:var(--accent2)"></div></div>
-          <div class="delivery-days">8.7 days</div>
+      <div class="exhibit">
+        <div class="exhibit-head">
+          <div class="t" id="trend-title">Delivered orders per month<small>Jan 2017 – Aug 2018</small></div>
+          <div class="seg" role="group" aria-label="Measure">
+            <button type="button" id="m-orders" aria-pressed="true">Orders</button>
+            <button type="button" id="m-revenue" aria-pressed="false">Revenue</button>
+          </div>
         </div>
-        <div class="delivery-row">
-          <div class="delivery-state">MG</div>
-          <div class="delivery-bar-wrap"><div class="delivery-bar" style="width:40%;background:var(--accent2)"></div></div>
-          <div class="delivery-days">11.9 days</div>
+        <div class="chart" id="trend"></div>
+        <details><summary>Show as table</summary><div class="tablebox"><table id="trend-table"></table></div></details>
+      </div>
+    </section>
+
+    <section class="section" id="delivery">
+      <div class="argument">
+        <div class="tag mono">02 · Delivery</div>
+        <h2 id="deliv-h"></h2>
+        <p id="deliv-p"></p>
+        <div class="stats" id="deliv-stats"></div>
+      </div>
+      <div class="exhibit">
+        <div class="exhibit-head">
+          <div class="t">Average review by delivery time<small>Delivered orders with a review</small></div>
+          <div class="legend"><span><i style="background:var(--accent)"></i>4★ and above</span><span><i style="background:var(--critical)"></i>Below 4★</span></div>
         </div>
-        <div class="delivery-row">
-          <div class="delivery-state">RJ</div>
-          <div class="delivery-bar-wrap"><div class="delivery-bar" style="width:44%;background:var(--accent)"></div></div>
-          <div class="delivery-days">15.2 days</div>
+        <div class="chart" id="buckets"></div>
+      </div>
+    </section>
+
+    <section class="section stack" id="retention">
+      <div class="argument wide">
+        <div class="tag mono">03 · Retention</div>
+        <h2 id="rfm-h"></h2>
+        <p id="rfm-p"></p>
+      </div>
+      <div class="exhibit">
+        <div class="exhibit-head"><div class="t">Customer segments (RFM)<small>Scored on recency, frequency and spend, in quintiles</small></div></div>
+        <div class="tablebox"><table id="rfm-table"></table></div>
+      </div>
+    </section>
+
+    <section class="section stack" id="regions">
+      <div class="argument wide">
+        <div class="tag mono">04 · Regions</div>
+        <h2 id="state-h"></h2>
+        <p id="state-p"></p>
+      </div>
+      <div class="exhibit">
+        <div class="exhibit-head">
+          <div class="t">Brazil by state<small>Each tile is one state, placed roughly where it sits on the map</small></div>
+          <div class="seg" role="group" aria-label="Map measure">
+            <button type="button" data-metric="share" aria-pressed="true">Orders</button>
+            <button type="button" data-metric="late" aria-pressed="false">Late rate</button>
+            <button type="button" data-metric="score" aria-pressed="false">Avg review</button>
+          </div>
         </div>
-        <div class="delivery-row">
-          <div class="delivery-state">BA</div>
-          <div class="delivery-bar-wrap"><div class="delivery-bar" style="width:56%;background:var(--accent3)"></div></div>
-          <div class="delivery-days">19.3 days</div>
-        </div>
-        <div class="delivery-row">
-          <div class="delivery-state">AM</div>
-          <div class="delivery-bar-wrap"><div class="delivery-bar" style="width:76%;background:var(--accent4)"></div></div>
-          <div class="delivery-days">26.4 days</div>
-        </div>
-        <div class="delivery-row">
-          <div class="delivery-state">RR</div>
-          <div class="delivery-bar-wrap"><div class="delivery-bar" style="width:100%;background:var(--accent4)"></div></div>
-          <div class="delivery-days">29.3 days</div>
+        <div class="regions">
+          <div style="display:grid;gap:14px">
+            <div class="tilemap" id="tilemap" role="img"></div>
+            <div class="ramp" id="ramp"></div>
+          </div>
+          <div class="tablebox"><table id="state-table"></table></div>
         </div>
       </div>
-    </div>
-  </div>
-</div>
+    </section>
 
-<!-- PAGE 3: SELLER PERFORMANCE -->
-<div class="page" id="page-seller">
-  <div class="kpi-row">
-    <div class="kpi blue">
-      <div class="kpi-label">Total Sellers</div>
-      <div class="kpi-value">3,095</div>
-      <div class="kpi-sub">Active on platform</div>
-    </div>
-    <div class="kpi green">
-      <div class="kpi-label">Top Seller Revenue</div>
-      <div class="kpi-value">R$229K</div>
-      <div class="kpi-sub">From 1,156 orders</div>
-    </div>
-    <div class="kpi orange">
-      <div class="kpi-label">Avg Seller Revenue</div>
-      <div class="kpi-value">R$5.2K</div>
-      <div class="kpi-sub">High concentration at top</div>
-    </div>
-    <div class="kpi red">
-      <div class="kpi-label">Top Seller Review</div>
-      <div class="kpi-value">4.82★</div>
-      <div class="kpi-sub">Best quality + volume seller</div>
-    </div>
-  </div>
-
-  <div class="chart-box" style="margin-bottom:16px">
-    <div class="chart-title">Top 15 Sellers by Revenue</div>
-    <div class="chart-sub">Rank 2 seller generates similar revenue to Rank 1 with 65% fewer orders — premium pricing beats volume</div>
-    <div class="chart-wrap" style="height:280px">
-      <canvas id="chart-sellers"></canvas>
-    </div>
-  </div>
-
-  <div class="chart-box">
-    <div class="chart-title">Top Sellers — Revenue vs Review Score</div>
-    <div class="chart-sub">High revenue doesn't guarantee high satisfaction — top earners range from 3.8 to 4.8 stars</div>
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th>Rank</th>
-          <th>Seller ID</th>
-          <th>Total Orders</th>
-          <th>Revenue</th>
-          <th>Avg Review</th>
-          <th>Quality Score</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td><span class="rank-badge">#1</span></td><td style="font-family:var(--mono);font-size:11px">4869f7a5...b52b2</td><td>1,156</td><td>R$229,472</td><td>4.1★</td><td><div class="score-bar"><div class="score-fill" style="width:82%"></div></div></td></tr>
-        <tr><td><span class="rank-badge">#2</span></td><td style="font-family:var(--mono);font-size:11px">53243585...8905</td><td>410</td><td>R$222,776</td><td>4.3★</td><td><div class="score-bar"><div class="score-fill" style="width:86%"></div></div></td></tr>
-        <tr><td><span class="rank-badge">#3</span></td><td style="font-family:var(--mono);font-size:11px">4a3ca931...884</td><td>1,987</td><td>R$200,472</td><td>3.9★</td><td><div class="score-bar"><div class="score-fill" style="width:78%"></div></div></td></tr>
-        <tr><td><span class="rank-badge">#4</span></td><td style="font-family:var(--mono);font-size:11px">fa1c13f2...a94</td><td>586</td><td>R$194,042</td><td>4.2★</td><td><div class="score-bar"><div class="score-fill" style="width:84%"></div></div></td></tr>
-        <tr><td><span class="rank-badge">#5</span></td><td style="font-family:var(--mono);font-size:11px">7c67e144...ab</td><td>1,364</td><td>R$187,923</td><td>4.0★</td><td><div class="score-bar"><div class="score-fill" style="width:80%"></div></div></td></tr>
-        <tr><td><span class="rank-badge">#6</span></td><td style="font-family:var(--mono);font-size:11px">7e93a43e...53a</td><td>340</td><td>R$176,431</td><td>4.5★</td><td><div class="score-bar"><div class="score-fill" style="width:90%"></div></div></td></tr>
-        <tr><td><span class="rank-badge">#7</span></td><td style="font-family:var(--mono);font-size:11px">da8622b1...84a</td><td>1,551</td><td>R$160,236</td><td>3.8★</td><td><div class="score-bar"><div class="score-fill" style="width:76%"></div></div></td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<!-- PAGE 4: RFM SEGMENTS -->
-<div class="page" id="page-rfm">
-  <div class="segment-grid">
-    <div class="seg-card" style="border-color:#4F8EF7">
-      <div class="seg-name" style="color:#4F8EF7">🏆 Champion</div>
-      <div class="seg-count" style="color:#4F8EF7">14,934</div>
-      <div class="seg-pct">15.9% of customers</div>
-      <div class="seg-rev" style="color:#4F8EF7">R$2.64M revenue</div>
-    </div>
-    <div class="seg-card" style="border-color:#2DD4A0">
-      <div class="seg-name" style="color:#2DD4A0">💚 Loyal</div>
-      <div class="seg-count" style="color:#2DD4A0">18,856</div>
-      <div class="seg-pct">20.1% of customers</div>
-      <div class="seg-rev" style="color:#2DD4A0">R$3.04M revenue</div>
-    </div>
-    <div class="seg-card" style="border-color:#A78BFA">
-      <div class="seg-name" style="color:#A78BFA">🆕 New Customer</div>
-      <div class="seg-count" style="color:#A78BFA">15,096</div>
-      <div class="seg-pct">16.1% of customers</div>
-      <div class="seg-rev" style="color:#A78BFA">R$2.47M revenue</div>
-    </div>
-    <div class="seg-card" style="border-color:#F7834F">
-      <div class="seg-name" style="color:#F7834F">⚠️ At Risk</div>
-      <div class="seg-count" style="color:#F7834F">22,224</div>
-      <div class="seg-pct">23.7% of customers</div>
-      <div class="seg-rev" style="color:#F7834F">R$3.71M revenue</div>
-    </div>
-    <div class="seg-card" style="border-color:#E25B5B">
-      <div class="seg-name" style="color:#E25B5B">💀 Lost</div>
-      <div class="seg-count" style="color:#E25B5B">22,247</div>
-      <div class="seg-pct">23.7% of customers</div>
-      <div class="seg-rev" style="color:#E25B5B">R$3.56M revenue</div>
-    </div>
-  </div>
-
-  <div class="chart-grid cols-2">
-    <div class="chart-box">
-      <div class="chart-title">Customer Count by Segment</div>
-      <div class="chart-sub">47% of customers are Lost or At Risk — major retention opportunity</div>
-      <div class="chart-wrap" style="height:260px">
-        <canvas id="chart-rfm-count"></canvas>
+    <section class="section stack" id="mix">
+      <div class="argument wide">
+        <div class="tag mono">05 · Category &amp; payment</div>
+        <h2 id="mix-h"></h2>
+        <p id="mix-p"></p>
       </div>
-    </div>
-    <div class="chart-box">
-      <div class="chart-title">Revenue by Segment</div>
-      <div class="chart-sub">Champions spend R$177 avg vs R$160 overall — loyalty drives value</div>
-      <div class="chart-wrap" style="height:260px">
-        <canvas id="chart-rfm-revenue"></canvas>
+      <div class="mix">
+        <div class="exhibit">
+          <div class="exhibit-head"><div class="t">Top 10 categories by item revenue<small>Item price excluding freight</small></div></div>
+          <div class="hbars" id="cats"></div>
+        </div>
+        <div class="exhibit">
+          <div class="exhibit-head"><div class="t">Payment value by method<small>Delivered orders</small></div></div>
+          <div class="stackbar" id="paystack" role="img"></div>
+          <div class="paylist" id="paylist"></div>
+          <p class="note" id="pay-note"></p>
+        </div>
       </div>
-    </div>
-  </div>
+    </section>
 
-  <div class="insight-row">
-    <div class="insight">
-      <div class="insight-icon">🎯</div>
-      <div class="insight-text"><strong>Retention crisis:</strong> 97% of customers never made a second purchase. 17,365 Q4 2017 buyers never returned in Q1 2018 — Black Friday brought buyers, not loyal customers.</div>
-    </div>
-    <div class="insight">
-      <div class="insight-icon">💰</div>
-      <div class="insight-text"><strong>At Risk = highest priority:</strong> R$3.71M revenue at risk from 22,224 customers who used to buy but haven't recently. A win-back campaign here has the highest ROI.</div>
-    </div>
-    <div class="insight">
-      <div class="insight-icon">👑</div>
-      <div class="insight-text"><strong>Champion value:</strong> Champions spend 2x the average customer and buy more frequently. A VIP loyalty programme for this segment could significantly increase LTV.</div>
-    </div>
+    <section class="section stack" id="actions" style="border-bottom:0">
+      <div class="argument wide">
+        <div class="tag mono">06 · Recommendations</div>
+        <h2>Three moves to turn first orders into second orders</h2>
+        <p>Each action targets a finding above and comes with one KPI to track it.</p>
+      </div>
+      <div class="actions" id="recs"></div>
+    </section>
+
+    <footer class="method">
+      <div class="tag mono">Method &amp; definitions</div>
+      <ul id="method"></ul>
+    </footer>
   </div>
-</div>
+</main>
+<div id="tip" role="tooltip"></div>
 
 <script>
-// ── CHART DEFAULTS ─────────────────────────────────────────
-Chart.defaults.color = '#8B90A8';
-Chart.defaults.borderColor = '#2D3148';
-Chart.defaults.font.family = 'Inter';
-Chart.defaults.font.size = 11;
+const D = {"total_orders":99441,"delivered_orders":96478,"revenue_delivered":15422461.77,"unique_customers":93358,"aov":159.8563571628471,"one_time_share":0.9699972150217443,"repeat_customers":2801,"repeat_share":0.03000278497825575,"avg_delivery_days":12.558217098051976,"late_share":0.08112366538820359,"avg_review":4.156157817109145,"delivery_by_score":{"1":21.3,"2":16.7,"3":14.2,"4":12.3,"5":10.7},"review_late":2.566505678109907,"review_ontime":4.294292012144172,"low_share_late":0.5398773006134969,"low_share_ontime":0.09187527647652644,"delivery_buckets":[{"bucket":"0-7","orders":25933,"score":4.42,"low_share":0.074},{"bucket":"8-14","orders":39997,"score":4.31,"low_share":0.089},{"bucket":"15-21","orders":17582,"score":4.14,"low_share":0.116},{"bucket":"22-30","orders":7882,"score":3.61,"low_share":0.243},{"bucket":"31-45","orders":3377,"score":2.4,"low_share":0.586},{"bucket":"45+","orders":1053,"score":1.78,"low_share":0.766}],"monthly":[{"month":"2017-01","orders":750,"revenue":127546.0},{"month":"2017-02","orders":1653,"revenue":271299.0},{"month":"2017-03","orders":2546,"revenue":414369.0},{"month":"2017-04","orders":2303,"revenue":390952.0},{"month":"2017-05","orders":3546,"revenue":567067.0},{"month":"2017-06","orders":3135,"revenue":490226.0},{"month":"2017-07","orders":3872,"revenue":566404.0},{"month":"2017-08","orders":4193,"revenue":646001.0},{"month":"2017-09","orders":4150,"revenue":701170.0},{"month":"2017-10","orders":4478,"revenue":751140.0},{"month":"2017-11","orders":7289,"revenue":1153528.0},{"month":"2017-12","orders":5513,"revenue":843199.0},{"month":"2018-01","orders":7069,"revenue":1078607.0},{"month":"2018-02","orders":6555,"revenue":966511.0},{"month":"2018-03","orders":7003,"revenue":1120678.0},{"month":"2018-04","orders":6798,"revenue":1132934.0},{"month":"2018-05","orders":6749,"revenue":1128837.0},{"month":"2018-06","orders":6099,"revenue":1012091.0},{"month":"2018-07","orders":6159,"revenue":1027904.0},{"month":"2018-08","orders":6351,"revenue":985414.0}],"states":[{"state":"SP","orders":40501,"share":0.4198,"revenue":5770266.0,"days":8.8,"late":0.059,"score":4.25},{"state":"RJ","orders":12350,"share":0.128,"revenue":2055690.0,"days":15.3,"late":0.135,"score":3.97},{"state":"MG","orders":11354,"share":0.1177,"revenue":1819278.0,"days":12.0,"late":0.056,"score":4.19},{"state":"RS","orders":5345,"share":0.0554,"revenue":861802.0,"days":15.3,"late":0.071,"score":4.19},{"state":"PR","orders":4923,"share":0.051,"revenue":781920.0,"days":12.0,"late":0.05,"score":4.24},{"state":"SC","orders":3546,"share":0.0368,"revenue":595208.0,"days":15.0,"late":0.098,"score":4.13},{"state":"BA","orders":3256,"share":0.0337,"revenue":591271.0,"days":19.3,"late":0.14,"score":3.93},{"state":"DF","orders":2080,"share":0.0216,"revenue":346146.0,"days":13.0,"late":0.071,"score":4.13},{"state":"ES","orders":1995,"share":0.0207,"revenue":317683.0,"days":15.8,"late":0.122,"score":4.08},{"state":"GO","orders":1957,"share":0.0203,"revenue":334294.0,"days":15.6,"late":0.082,"score":4.1},{"state":"PE","orders":1593,"share":0.0165,"revenue":309075.0,"days":18.4,"late":0.108,"score":4.08},{"state":"CE","orders":1279,"share":0.0133,"revenue":266464.0,"days":21.3,"late":0.153,"score":3.94},{"state":"PA","orders":946,"share":0.0098,"revenue":212028.0,"days":23.8,"late":0.124,"score":3.91},{"state":"MT","orders":886,"share":0.0092,"revenue":181442.0,"days":18.1,"late":0.068,"score":4.15},{"state":"MA","orders":717,"share":0.0074,"revenue":147807.0,"days":21.6,"late":0.197,"score":3.83},{"state":"MS","orders":701,"share":0.0073,"revenue":134422.0,"days":15.6,"late":0.116,"score":4.16},{"state":"PB","orders":517,"share":0.0054,"revenue":137835.0,"days":20.4,"late":0.11,"score":4.08},{"state":"PI","orders":476,"share":0.0049,"revenue":105272.0,"days":19.5,"late":0.16,"score":3.99},{"state":"RN","orders":474,"share":0.0049,"revenue":100728.0,"days":19.3,"late":0.108,"score":4.15},{"state":"AL","orders":397,"share":0.0041,"revenue":94196.0,"days":24.5,"late":0.239,"score":3.85},{"state":"SE","orders":335,"share":0.0035,"revenue":70289.0,"days":21.5,"late":0.152,"score":3.91},{"state":"TO","orders":274,"share":0.0028,"revenue":60007.0,"days":17.7,"late":0.128,"score":4.15},{"state":"RO","orders":243,"share":0.0025,"revenue":56976.0,"days":19.4,"late":0.029,"score":4.17},{"state":"AM","orders":145,"share":0.0015,"revenue":27596.0,"days":26.4,"late":0.041,"score":4.24},{"state":"AC","orders":80,"share":0.0008,"revenue":19586.0,"days":21.0,"late":0.037,"score":4.09},{"state":"AP","orders":67,"share":0.0007,"revenue":16142.0,"days":27.2,"late":0.045,"score":4.24},{"state":"RR","orders":41,"share":0.0004,"revenue":9040.0,"days":29.4,"late":0.122,"score":3.9}],"categories":[{"cat":"health_beauty","revenue":1233132.0,"items":9465,"share":0.0933,"score":4.19},{"cat":"watches_gifts","revenue":1166177.0,"items":5859,"share":0.0882,"score":4.07},{"cat":"bed_bath_table","revenue":1023435.0,"items":10953,"share":0.0774,"score":3.92},{"cat":"sports_leisure","revenue":954853.0,"items":8431,"share":0.0722,"score":4.17},{"cat":"computers_accessories","revenue":888725.0,"items":7644,"share":0.0672,"score":3.99},{"cat":"furniture_decor","revenue":711928.0,"items":8160,"share":0.0538,"score":3.95},{"cat":"housewares","revenue":615629.0,"items":6795,"share":0.0466,"score":4.11},{"cat":"cool_stuff","revenue":610204.0,"items":3718,"share":0.0462,"score":4.19},{"cat":"auto","revenue":578967.0,"items":4140,"share":0.0438,"score":4.12},{"cat":"toys","revenue":471286.0,"items":4030,"share":0.0356,"score":4.21}],"payments":{"credit_card":12101095.0,"boleto":2769933.0,"voucher":343013.0,"debit_card":208421.0},"avg_installments_cc":3.501434585579063,"rfm":[{"segment":"Champions","customers":9395,"revenue":2853592.0,"avg_spend":303.7,"recency":91.0,"spend_index":1.84},{"segment":"Loyal","customers":24049,"revenue":4708043.0,"avg_spend":195.8,"recency":150.0,"spend_index":1.19},{"segment":"New / Promising","customers":15023,"revenue":1135856.0,"avg_spend":75.6,"recency":90.0,"spend_index":0.46},{"segment":"Need Attention","customers":7675,"revenue":571055.0,"avg_spend":74.4,"recency":220.0,"spend_index":0.45},{"segment":"At Risk","customers":21888,"revenue":5012460.0,"avg_spend":229.0,"recency":394.0,"spend_index":1.39},{"segment":"Hibernating","customers":15328,"revenue":1141456.0,"avg_spend":74.5,"recency":397.0,"spend_index":0.45}],"date_range":["2016-09-15","2018-08-29"]};
 
-const BLUE = '#4F8EF7';
-const GREEN = '#2DD4A0';
-const ORANGE = '#F7834F';
-const RED = '#E25B5B';
-const PURPLE = '#A78BFA';
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => [...document.querySelectorAll(s)];
+const nf = new Intl.NumberFormat("en-US");
+const fmtInt = (v) => nf.format(Math.round(v));
+const fmtPct = (v, d = 1) => (v * 100).toFixed(d) + "%";
+const fmtR = (v) => {
+  if (v >= 1e6) return "R$" + (v / 1e6).toFixed(v >= 1e7 ? 1 : 2) + "M";
+  if (v >= 1e3) return "R$" + (v / 1e3).toFixed(0) + "K";
+  return "R$" + v.toFixed(0);
+};
+const esc = (s) => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;");
+const prettyCat = (c) => c.replace(/_/g, " ").replace(/^./, (m) => m.toUpperCase());
+const MON = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const monthLabel = (m) => { const [y, mo] = m.split("-"); return MON[+mo - 1] + " " + y.slice(2); };
+const warnIcon = '<svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 1 15 14H1L8 1Zm-.9 5v4h1.8V6H7.1Zm0 5v1.8h1.8V11H7.1Z"/></svg>';
 
-// ── PAGE 1: MONTHLY TREND ───────────────────────────────────
-const months = ['2016-09','2016-10','2016-12','2017-01','2017-02','2017-03','2017-04','2017-05','2017-06','2017-07','2017-08','2017-09','2017-10','2017-11','2017-12','2018-01','2018-02','2018-03','2018-04','2018-05','2018-06','2018-07','2018-08'];
-const monthlyOrders = [1,324,26,800,1780,2682,2404,3700,3245,4026,4331,4285,4631,7274,5503,7011,6533,7027,6939,6909,6095,6105,6295];
-const monthlyRevenue = [0.25,59.1,0.02,138.5,291.9,449.9,417.8,592.9,511.3,592.4,674.4,727.8,892.1,1194.9,878.4,1115.0,992.5,1159.7,1160.8,1154.0,1023.9,1066.5,1022.4];
-
-new Chart(document.getElementById('chart-monthly'), {
-  type: 'line',
-  data: {
-    labels: months,
-    datasets: [
-      { label: 'Orders', data: monthlyOrders, borderColor: BLUE, backgroundColor: BLUE+'22', fill: true, tension: 0.3, yAxisID: 'y', pointRadius: 3 },
-      { label: 'Revenue (R$ K)', data: monthlyRevenue, borderColor: GREEN, backgroundColor: 'transparent', tension: 0.3, yAxisID: 'y2', pointRadius: 3 }
-    ]
-  },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    interaction: { mode: 'index', intersect: false },
-    plugins: { legend: { position: 'top' } },
-    scales: {
-      x: { grid: { color: '#2D3148' }, ticks: { maxRotation: 45, font: { size: 10 } } },
-      y: { grid: { color: '#2D3148' }, position: 'left', title: { display: true, text: 'Orders' } },
-      y2: { grid: { display: false }, position: 'right', title: { display: true, text: 'Revenue (R$ K)' } }
-    }
-  }
-});
-
-// States chart
-new Chart(document.getElementById('chart-states'), {
-  type: 'bar',
-  data: {
-    labels: ['SP','MG','RJ','RS','PR','SC','BA','DF','ES','GO'],
-    datasets: [{ label: 'Orders', data: [41746,11635,12852,5466,5045,3637,3380,2140,2033,2020], backgroundColor: [BLUE,BLUE+'CC',BLUE+'AA',BLUE+'88',BLUE+'88',BLUE+'77',BLUE+'77',BLUE+'66',BLUE+'66',BLUE+'66'] }]
-  },
-  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#2D3148' } } } }
-});
-
-// Payments pie
-new Chart(document.getElementById('chart-payments'), {
-  type: 'doughnut',
-  data: {
-    labels: ['Credit Card', 'Boleto', 'Voucher', 'Debit Card'],
-    datasets: [{ data: [76795,19784,5775,1529], backgroundColor: [BLUE, GREEN, ORANGE, PURPLE], borderWidth: 0, hoverOffset: 8 }]
-  },
-  options: { responsive: true, maintainAspectRatio: false, cutout: '65%', plugins: { legend: { position: 'bottom' } } }
-});
-
-// ── PAGE 2: CATEGORIES ──────────────────────────────────────
-new Chart(document.getElementById('chart-categories'), {
-  type: 'bar',
-  data: {
-    labels: ['beleza_saude','relogios_presentes','cama_mesa_banho','esporte_lazer','informatica_acess','moveis_decoracao','cool_stuff','utilidades_dom','automotivo','ferramentas_jardim'],
-    datasets: [{ label: 'Revenue (R$)', data: [1258681,1205005,1036988,988049,911954,729762,635290,632248,592720,485256], backgroundColor: BLUE+'CC' }]
-  },
-  options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#2D3148' } }, y: { grid: { display: false }, ticks: { font: { size: 10 } } } } }
-});
-
-// Delivery vs review
-new Chart(document.getElementById('chart-delivery-review'), {
-  type: 'bar',
-  data: {
-    labels: ['1★','2★','3★','4★','5★'],
-    datasets: [{ label: 'Avg Delivery Days', data: [20.8,16.2,13.8,11.8,10.2], backgroundColor: [RED, ORANGE+'AA', ORANGE, GREEN+'AA', GREEN] }]
-  },
-  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#2D3148' }, min: 0, max: 25 } } }
-});
-
-// Reviews
-new Chart(document.getElementById('chart-reviews'), {
-  type: 'bar',
-  data: {
-    labels: ['1★','2★','3★','4★','5★'],
-    datasets: [{ data: [11424,3151,8179,19142,57328], backgroundColor: [RED,ORANGE+'AA',ORANGE,GREEN+'AA',GREEN] }]
-  },
-  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#2D3148' } } } }
-});
-
-// ── PAGE 3: SELLERS ─────────────────────────────────────────
-new Chart(document.getElementById('chart-sellers'), {
-  type: 'bar',
-  data: {
-    labels: ['#1','#2','#3','#4','#5','#6','#7','#8','#9','#10','#11','#12','#13','#14','#15'],
-    datasets: [{ label: 'Revenue (R$)', data: [229472,222776,200472,194042,187923,176431,160236,141745,138968,135171,128111,123304,118443,113985,109234], backgroundColor: BLUE+'CC' }]
-  },
-  options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false } }, y: { grid: { color: '#2D3148' } } } }
-});
-
-// ── PAGE 4: RFM ─────────────────────────────────────────────
-new Chart(document.getElementById('chart-rfm-count'), {
-  type: 'doughnut',
-  data: {
-    labels: ['Champion','Loyal','New Customer','At Risk','Lost'],
-    datasets: [{ data: [14934,18856,15096,22224,22247], backgroundColor: [BLUE,GREEN,PURPLE,ORANGE,RED], borderWidth: 0, hoverOffset: 8 }]
-  },
-  options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { position: 'bottom' } } }
-});
-
-new Chart(document.getElementById('chart-rfm-revenue'), {
-  type: 'bar',
-  data: {
-    labels: ['At Risk','Lost','Loyal','Champion','New Customer'],
-    datasets: [{ label: 'Revenue (R$)', data: [3708095,3561753,3037000,2644373,2471000], backgroundColor: [ORANGE,RED,GREEN,BLUE,PURPLE] }]
-  },
-  options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: '#2D3148' } }, y: { grid: { display: false } } } }
-});
-
-// ── PAGE SWITCHING ──────────────────────────────────────────
-function showPage(id) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('page-' + id).classList.add('active');
-  event.target.classList.add('active');
+/* ---------- tooltip ---------- */
+const tip = $("#tip");
+function showTip(html, x, y) {
+  tip.innerHTML = html;
+  tip.style.opacity = 1;
+  const r = tip.getBoundingClientRect();
+  let left = x + 14, top = y + 14;
+  if (left + r.width > window.innerWidth - 8) left = x - r.width - 14;
+  if (top + r.height > window.innerHeight - 8) top = y - r.height - 14;
+  tip.style.left = Math.max(8, left) + "px";
+  tip.style.top = Math.max(8, top) + "px";
 }
+function hideTip() { tip.style.opacity = 0; }
+document.addEventListener("pointermove", (e) => {
+  const t = e.target.closest?.("[data-tip]");
+  if (t) showTip(t.dataset.tip, e.clientX, e.clientY);
+});
+document.addEventListener("pointerout", (e) => {
+  if (e.target.closest?.("[data-tip]") && !e.relatedTarget?.closest?.("[data-tip]")) hideTip();
+});
+window.addEventListener("scroll", hideTip, { passive: true });
+
+/* ---------- derived ---------- */
+const months = D.monthly;
+const first = months[0], jan18 = months.find((m) => m.month === "2018-01");
+const peak = months.reduce((a, b) => (b.orders > a.orders ? b : a));
+const m2018 = months.filter((m) => m.month.startsWith("2018"));
+const avg2018 = m2018.reduce((s, m) => s + m.orders, 0) / m2018.length;
+const payTotal = Object.values(D.payments).reduce((a, b) => a + b, 0);
+const seg = Object.fromEntries(D.rfm.map((s) => [s.segment, s]));
+const topStates = D.states.slice(0, 10);
+const worstLate = [...topStates].sort((a, b) => b.late - a.late).slice(0, 2);
+const worstSet = new Set(worstLate.map((s) => s.state));
+const B = D.delivery_buckets;
+const lowTotal = B.reduce((s, b) => s + b.orders * b.low_share, 0);
+const over30Orders = (B[4].orders + B[5].orders) / B.reduce((s, b) => s + b.orders, 0);
+const over30Low = (B[4].orders * B[4].low_share + B[5].orders * B[5].low_share) / lowTotal;
+
+/* ---------- hero ---------- */
+const repeatPer100 = Math.round(D.repeat_share * 100);
+$("#waffle").innerHTML = Array.from({ length: 100 }, (_, i) => `<i class="${i >= 100 - repeatPer100 ? "on" : ""}"></i>`).join("");
+$("#waffle-key").innerHTML = `
+  <div><b class="num">${fmtPct(D.one_time_share)}</b><i></i>ordered once</div>
+  <div class="gold" style="text-align:right"><b class="num">${fmtPct(D.repeat_share)}</b><i></i>came back</div>`;
+$("#lede").innerHTML =
+  `Olist grew fast: <b>${fmtInt(D.delivered_orders)} delivered orders</b> and <b>${fmtR(D.revenue_delivered)}</b> in revenue in under two years. ` +
+  `But almost every customer bought once and left, and late deliveries are the clearest reason they leave unhappy.`;
+const kpis = [
+  { label: "Revenue", value: fmtR(D.revenue_delivered), note: "delivered orders" },
+  { label: "Orders", value: fmtInt(D.delivered_orders), note: `of ${fmtInt(D.total_orders)} placed` },
+  { label: "Customers", value: fmtInt(D.unique_customers), note: "unique buyers" },
+  { label: "Avg order", value: "R$" + D.aov.toFixed(0), note: "per delivered order" },
+  { label: "Avg review", value: D.avg_review.toFixed(2) + "★", note: "out of 5" },
+  { label: "Late", value: fmtPct(D.late_share), note: "missed promised date" },
+];
+$("#kpis").innerHTML = kpis.map((k) => `
+  <div class="kpi"><span class="label mono">${k.label}</span><span class="value num">${k.value}</span><span class="note">${k.note}</span></div>`).join("");
+
+/* ---------- 01 growth ---------- */
+$("#growth-h").textContent = `Orders grew ${(jan18.orders / first.orders).toFixed(0)}x in a year, then stalled`;
+$("#growth-p").textContent =
+  `Monthly delivered orders rose from ${fmtInt(first.orders)} in January 2017 to ${fmtInt(jan18.orders)} in January 2018, with a Black Friday spike of ${fmtInt(peak.orders)} in November 2017. ` +
+  `Through 2018 volume held flat at about ${fmtInt(Math.round(avg2018 / 100) * 100)} a month. With 97% of buyers never returning, growth depends entirely on finding new customers.`;
+
+let measure = "orders";
+function niceMax(v) {
+  const p = Math.pow(10, Math.floor(Math.log10(v)));
+  const n = v / p;
+  return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * p;
+}
+function drawTrend() {
+  const el = $("#trend");
+  const W = Math.max(300, el.clientWidth), H = W < 520 ? 240 : 290;
+  const m = { l: 50, r: 14, t: 30, b: 26 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const vals = months.map((d) => d[measure]);
+  const ymax = niceMax(Math.max(...vals) * 1.08);
+  const x = (i) => m.l + (i / (months.length - 1)) * iw;
+  const y = (v) => m.t + ih - (v / ymax) * ih;
+  const fmtY = measure === "orders" ? (v) => fmtInt(v) : (v) => (v === 0 ? "0" : fmtR(v));
+  let g = `<defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity="0.22"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>`;
+  for (let i = 0; i <= 4; i++) {
+    const v = (ymax / 4) * i, yy = y(v);
+    g += `<line x1="${m.l}" x2="${W - m.r}" y1="${yy}" y2="${yy}" stroke="var(${i === 0 ? "--axis" : "--grid"})"/>`;
+    g += `<text x="${m.l - 8}" y="${yy + 4}" text-anchor="end" class="num">${fmtY(v)}</text>`;
+  }
+  // shade 2018 plateau
+  const i18 = months.findIndex((d) => d.month === "2018-01");
+  g += `<rect x="${x(i18)}" y="${m.t}" width="${x(months.length - 1) - x(i18)}" height="${ih}" fill="var(--accent-wash)" opacity="0.6"/>`;
+  g += `<text x="${x(i18) + 8}" y="${m.t + 14}" class="ref">2018: flat</text>`;
+  const step = W < 520 ? 6 : 3;
+  months.forEach((d, i) => { if (i % step === 0) g += `<text x="${x(i)}" y="${H - 6}" text-anchor="middle">${monthLabel(d.month)}</text>`; });
+  const pts = months.map((d, i) => `${x(i).toFixed(1)},${y(d[measure]).toFixed(1)}`);
+  g += `<path d="M${x(0)},${y(0)} L${pts.join(" L")} L${x(months.length - 1)},${y(0)} Z" fill="url(#ag)"/>`;
+  g += `<path d="M${pts.join(" L")}" fill="none" stroke="var(--accent)" stroke-width="2.25" stroke-linejoin="round" stroke-linecap="round"/>`;
+  const pi = months.indexOf(peak);
+  g += `<circle cx="${x(pi)}" cy="${y(peak[measure])}" r="4.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`;
+  g += `<text x="${x(pi) - 8}" y="${y(peak[measure]) - 10}" text-anchor="end" class="ref">Black Friday</text>`;
+  const li = months.length - 1;
+  g += `<circle cx="${x(li)}" cy="${y(months[li][measure])}" r="4" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`;
+  g += `<line id="cross" x1="0" x2="0" y1="${m.t}" y2="${m.t + ih}" stroke="var(--ink-2)" stroke-width="1" stroke-dasharray="3 3" opacity="0"/>`;
+  g += `<circle id="crossdot" r="5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2" opacity="0"/>`;
+  g += `<rect id="hit" x="${m.l}" y="${m.t}" width="${iw}" height="${ih}" fill="transparent"/>`;
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Monthly ${measure}, Jan 2017 to Aug 2018">${g}</svg>`;
+  const svg = el.querySelector("svg"), hit = el.querySelector("#hit"), cross = el.querySelector("#cross"), dot = el.querySelector("#crossdot");
+  hit.addEventListener("pointermove", (e) => {
+    e.stopPropagation();
+    const r = svg.getBoundingClientRect();
+    const px = ((e.clientX - r.left) / r.width) * W;
+    const i = Math.max(0, Math.min(li, Math.round(((px - m.l) / iw) * li)));
+    const d = months[i];
+    cross.setAttribute("x1", x(i)); cross.setAttribute("x2", x(i)); cross.setAttribute("opacity", 1);
+    dot.setAttribute("cx", x(i)); dot.setAttribute("cy", y(d[measure])); dot.setAttribute("opacity", 1);
+    showTip(`<b>${monthLabel(d.month)}</b>${fmtInt(d.orders)} orders<br>R$${fmtInt(d.revenue)} revenue`, e.clientX, e.clientY);
+  });
+  hit.addEventListener("pointerleave", () => { cross.setAttribute("opacity", 0); dot.setAttribute("opacity", 0); hideTip(); });
+}
+function setMeasure(mv) {
+  measure = mv;
+  $("#m-orders").setAttribute("aria-pressed", mv === "orders");
+  $("#m-revenue").setAttribute("aria-pressed", mv === "revenue");
+  $("#trend-title").firstChild.textContent = mv === "orders" ? "Delivered orders per month" : "Revenue per month (R$)";
+  drawTrend();
+}
+$("#m-orders").addEventListener("click", () => setMeasure("orders"));
+$("#m-revenue").addEventListener("click", () => setMeasure("revenue"));
+$("#trend-table").innerHTML = `<thead><tr><th>Month</th><th>Delivered orders</th><th>Revenue (R$)</th></tr></thead><tbody>` +
+  months.map((d) => `<tr><td>${monthLabel(d.month)}</td><td>${fmtInt(d.orders)}</td><td>${fmtInt(d.revenue)}</td></tr>`).join("") + `</tbody>`;
+
+/* ---------- 02 delivery ---------- */
+$("#deliv-h").textContent = `Late orders average ${D.review_late.toFixed(1)}★; on-time orders average ${D.review_ontime.toFixed(1)}★`;
+$("#deliv-p").textContent =
+  `Ratings hold above 4★ while delivery takes under three weeks, then fall off a cliff. Orders taking over 30 days are only ${fmtPct(over30Orders)} of orders but produce ${fmtPct(over30Low, 0)} of all 1–2★ reviews.`;
+$("#deliv-stats").innerHTML = `
+  <div class="stat"><b class="num">${D.review_ontime.toFixed(2)}★</b><span>avg review, on-time orders</span></div>
+  <div class="stat bad"><b class="num">${D.review_late.toFixed(2)}★</b><span>avg review, late orders</span></div>
+  <div class="stat"><b class="num">${fmtPct(D.low_share_ontime, 0)}</b><span>of on-time orders rated 1–2★</span></div>
+  <div class="stat bad"><b class="num">${fmtPct(D.low_share_late, 0)}</b><span>of late orders rated 1–2★</span></div>`;
+
+function drawBuckets() {
+  const el = $("#buckets");
+  const W = Math.max(300, el.clientWidth), H = W < 520 ? 240 : 290;
+  const m = { l: 32, r: 10, t: 22, b: 44 };
+  const iw = W - m.l - m.r, ih = H - m.t - m.b;
+  const y = (v) => m.t + ih - (v / 5) * ih;
+  const band = iw / B.length, bw = Math.min(60, band * 0.6);
+  let g = "";
+  for (let v = 0; v <= 5; v++) {
+    g += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(${v === 0 ? "--axis" : "--grid"})"/>`;
+    g += `<text x="${m.l - 8}" y="${y(v) + 4}" text-anchor="end">${v}★</text>`;
+  }
+  B.forEach((b, i) => {
+    const cx = m.l + band * i + band / 2, x0 = cx - bw / 2, top = y(b.score), base = y(0), r = 4;
+    const low = b.score < 4;
+    const d = `M${x0},${base} L${x0},${top + r} Q${x0},${top} ${x0 + r},${top} L${x0 + bw - r},${top} Q${x0 + bw},${top} ${x0 + bw},${top + r} L${x0 + bw},${base} Z`;
+    const t = `<b>${b.bucket} days to deliver</b>${fmtInt(b.orders)} orders<br>Avg review ${b.score.toFixed(2)}★<br>${fmtPct(b.low_share)} rated 1–2★`;
+    g += `<rect x="${cx - band / 2}" y="${m.t}" width="${band}" height="${ih}" fill="transparent" data-tip="${esc(t)}"/>`;
+    g += `<path d="${d}" fill="var(${low ? "--critical" : "--accent"})" pointer-events="none"/>`;
+    g += `<text x="${cx}" y="${top - 8}" text-anchor="middle" class="val num">${b.score.toFixed(2)}</text>`;
+    g += `<text x="${cx}" y="${H - 26}" text-anchor="middle">${b.bucket}</text>`;
+  });
+  g += `<text x="${m.l + iw / 2}" y="${H - 6}" text-anchor="middle">Days from purchase to delivery</text>`;
+  const ay = y(D.avg_review);
+  g += `<line x1="${m.l}" x2="${W - m.r}" y1="${ay}" y2="${ay}" stroke="var(--ink-2)" stroke-dasharray="4 4" pointer-events="none"/>`;
+  g += `<text x="${W - m.r}" y="${ay - 6}" text-anchor="end" class="ref">Overall ${D.avg_review.toFixed(2)}★</text>`;
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Average review by delivery time; bars below 4 stars in red">${g}</svg>`;
+}
+
+/* ---------- 03 retention ---------- */
+const atRisk = seg["At Risk"], champs = seg["Champions"];
+$("#rfm-h").textContent = `${fmtInt(atRisk.customers)} high-value customers, worth ${fmtR(atRisk.revenue)}, have gone quiet`;
+$("#rfm-p").textContent =
+  `The At Risk group spent ${atRisk.spend_index.toFixed(1)}x the average customer but last ordered about ${Math.round(atRisk.recency / 30)} months ago. ` +
+  `It holds more past revenue than any other segment, including Champions, who spend ${champs.spend_index.toFixed(1)}x the average and bought recently.`;
+const maxRev = Math.max(...D.rfm.map((s) => s.revenue));
+$("#rfm-table").innerHTML = `<thead><tr><th>Segment</th><th style="text-align:left">Revenue</th><th>Customers</th><th>Avg spend</th><th>vs avg</th><th>Days since last order</th></tr></thead><tbody>` +
+  D.rfm.map((s) => `<tr class="${s.segment === "At Risk" ? "hl" : ""}">
+    <td><b style="font-weight:600">${s.segment}</b>${s.segment === "At Risk" ? `<span class="pill">${warnIcon}Priority</span>` : ""}</td>
+    <td class="barcell"><div class="cellbar"><span style="width:${(s.revenue / maxRev) * 72}%"></span><em class="num">${fmtR(s.revenue)}</em></div></td>
+    <td>${fmtInt(s.customers)}</td><td>R$${s.avg_spend.toFixed(0)}</td><td>${s.spend_index.toFixed(2)}x</td><td>${fmtInt(s.recency)}</td>
+  </tr>`).join("") + `</tbody>`;
+
+/* ---------- 04 regions ---------- */
+$("#state-h").textContent = `São Paulo drives ${fmtPct(D.states[0].share, 0)} of orders; ${worstLate.map((s) => s.state === "RJ" ? "Rio" : s.state === "BA" ? "Bahia" : s.state).join(" and ")} run late most often`;
+$("#state-p").textContent =
+  `Among the 10 biggest states, ${worstLate.map((s) => `${s.state} misses the delivery date on ${fmtPct(s.late, 1)} of orders`).join(" and ")}, against ${fmtPct(D.states[0].late, 1)} in São Paulo. Their reviews are the lowest of the group too. Rio is the second-largest market, so its delays hit the most customers.`;
+
+const TILE = { RR:[0,2], AP:[0,4], AM:[1,1], PA:[1,3], MA:[1,4], CE:[1,5], RN:[1,6],
+  AC:[2,0], RO:[2,1], MT:[2,2], TO:[2,3], PI:[2,4], PE:[2,5], PB:[2,6],
+  MS:[3,2], GO:[3,3], BA:[3,4], SE:[3,5], AL:[3,6],
+  DF:[4,3], MG:[4,4], ES:[4,5], PR:[5,2], SP:[5,3], RJ:[5,4], SC:[6,2], RS:[7,2] };
+const METRICS = {
+  share: { label: "Share of orders", fmt: (s) => fmtPct(s.share, s.share < 0.01 ? 1 : 0), val: (s) => s.share },
+  late: { label: "Late-delivery rate", fmt: (s) => fmtPct(s.late, 0), val: (s) => s.late },
+  score: { label: "Average review", fmt: (s) => s.score.toFixed(1), val: (s) => s.score },
+};
+let mapMetric = "share";
+function drawMap() {
+  const M = METRICS[mapMetric];
+  const sorted = [...D.states].sort((a, b) => M.val(a) - M.val(b));
+  const bin = new Map(sorted.map((s, i) => [s.state, Math.min(4, Math.floor((i / sorted.length) * 5))]));
+  const bounds = [0, 1, 2, 3, 4].map((q) => { const xs = sorted.filter((s) => bin.get(s.state) === q); return [M.val(xs[0]), M.val(xs[xs.length - 1])]; });
+  $("#tilemap").setAttribute("aria-label", `${M.label} by Brazilian state`);
+  $("#tilemap").innerHTML = D.states.map((s) => {
+    const [r, c] = TILE[s.state], q = bin.get(s.state);
+    const t = `<b>${s.state}</b>${fmtInt(s.orders)} orders (${fmtPct(s.share)})<br>Avg delivery ${s.days.toFixed(1)} days<br>Late ${fmtPct(s.late)} · Review ${s.score.toFixed(2)}★${s.orders < 500 ? "<br><i>Small sample</i>" : ""}`;
+    return `<div class="tile" style="grid-row:${r + 1};grid-column:${c + 1};background:var(--q${q});color:var(--qi${q})" data-tip="${esc(t)}"><b>${s.state}</b><small>${M.fmt(s)}</small></div>`;
+  }).join("");
+  const f = mapMetric === "share" ? (v) => fmtPct(v, v < 0.01 ? 1 : 0) : mapMetric === "late" ? (v) => fmtPct(v, 0) : (v) => v.toFixed(1) + "★";
+  $("#ramp").innerHTML = `<div>${M.label}, five equal-count groups</div>
+    <div class="bins">${[0, 1, 2, 3, 4].map((q) => `<i style="background:var(--q${q})" data-tip="${esc(`<b>Group ${q + 1}</b>${f(bounds[q][0])} – ${f(bounds[q][1])}`)}"></i>`).join("")}</div>
+    <div class="ends"><span>${f(bounds[0][0])}</span><span>${f(bounds[4][1])}</span></div>`;
+  $$(".seg [data-metric]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.metric === mapMetric));
+}
+$$(".seg [data-metric]").forEach((b) => b.addEventListener("click", () => { mapMetric = b.dataset.metric; drawMap(); }));
+const maxShare = topStates[0].share;
+$("#state-table").innerHTML = `<thead><tr><th>State</th><th style="text-align:left">Share of orders</th><th>Avg days</th><th>Late</th><th>Review</th></tr></thead><tbody>` +
+  topStates.map((s) => `<tr class="${worstSet.has(s.state) ? "hl" : ""}">
+    <td><b>${s.state}</b>${worstSet.has(s.state) ? `<span class="pill">${warnIcon}Late</span>` : ""}</td>
+    <td class="barcell"><div class="cellbar"><span style="width:${(s.share / maxShare) * 64}%"></span><em class="num">${fmtPct(s.share)}</em></div></td>
+    <td>${s.days.toFixed(1)}</td><td class="${worstSet.has(s.state) ? "late-hi" : ""}">${fmtPct(s.late)}</td><td>${s.score.toFixed(2)}★</td>
+  </tr>`).join("") + `</tbody>`;
+
+/* ---------- 05 mix ---------- */
+const top3 = D.categories.slice(0, 3).reduce((s, c) => s + c.share, 0);
+$("#mix-h").textContent = `No category dominates, and 78% of money moves by credit card`;
+$("#mix-p").textContent =
+  `The top three categories bring in only ${fmtPct(top3, 0)} of item revenue, so retention work has to be broad, not tied to one category. ` +
+  `Card buyers split payments into ${D.avg_installments_cc.toFixed(1)} instalments on average, a common pattern in Brazil.`;
+const maxCat = D.categories[0].revenue;
+$("#cats").innerHTML = D.categories.map((c) => {
+  const t = `<b>${prettyCat(c.cat)}</b>R$${fmtInt(c.revenue)} · ${fmtPct(c.share)} of item revenue<br>${fmtInt(c.items)} items · ${c.score.toFixed(2)}★ avg review`;
+  return `<div class="hbar" data-tip="${esc(t)}">
+    <span class="name">${prettyCat(c.cat)}</span>
+    <span class="track"><span class="fill" style="width:${(c.revenue / maxCat) * 100}%"></span></span>
+    <span class="v">${fmtR(c.revenue)}</span></div>`;
+}).join("");
+const payNames = { credit_card: "Credit card", boleto: "Boleto (bank slip)", voucher: "Voucher", debit_card: "Debit card" };
+const payColors = ["--s1", "--s2", "--s3", "--s4"];
+const payRows = Object.entries(D.payments);
+$("#paystack").setAttribute("aria-label", payRows.map(([k, v]) => `${payNames[k]} ${fmtPct(v / payTotal)}`).join(", "));
+$("#paystack").innerHTML = payRows.map(([k, v], i) =>
+  `<div style="flex:${v} 1 0;background:var(${payColors[i]})" data-tip="${esc(`<b>${payNames[k]}</b>${fmtR(v)} · ${fmtPct(v / payTotal)}`)}"></div>`).join("");
+$("#paylist").innerHTML = payRows.map(([k, v], i) =>
+  `<div class="payrow"><i style="background:var(${payColors[i]})"></i><span>${payNames[k]}</span><span class="amt">${fmtR(v)}</span><span class="pct">${fmtPct(v / payTotal)}</span></div>`).join("");
+$("#pay-note").textContent = `Boleto is a bank slip paid at a bank, lottery outlet or online; it suits buyers without a credit card.`;
+
+/* ---------- 06 recommendations ---------- */
+const lift = 0.02, extraCust = D.unique_customers * lift, extraRev = extraCust * D.aov;
+const recs = [
+  { n: "01", h: "Win back the At Risk segment",
+    p: `${fmtInt(atRisk.customers)} customers spent ${fmtR(atRisk.revenue)} but have not ordered in over a year. Send reactivation offers based on the category they last bought.`,
+    why: `Largest pool of past revenue`, k: `Reactivation rate per campaign` },
+  { n: "02", h: "Make the second order easy",
+    p: `Only ${fmtPct(D.repeat_share)} of customers return. Send a next-order coupon right after a good review. Each extra 2 points of repeat rate is about ${fmtInt(Math.round(extraCust / 100) * 100)} returning customers, roughly ${fmtR(extraRev)} at today's order value.`,
+    why: `Growth has stalled on new customers alone`, k: `Repeat purchase rate within 90 days` },
+  { n: "03", h: "Fix delivery where it is weakest",
+    p: `${worstLate.map((s) => s.state).join(" and ")} miss the promised date on ${worstLate.map((s) => fmtPct(s.late, 0)).join(" and ")} of orders. Review carriers there and set realistic delivery estimates, since a missed date is what triggers 1★ reviews.`,
+    why: `54% of late orders get 1–2★`, k: `On-time rate by state, weekly` },
+];
+$("#recs").innerHTML = recs.map((r) => `
+  <article class="action">
+    <span class="n">${r.n}</span>
+    <h2>${r.h}</h2>
+    <p>${r.p}</p>
+    <dl><div><dt class="mono">Why</dt><dd>${r.why}</dd></div><div><dt class="mono">Track</dt><dd>${r.k}</dd></div></dl>
+  </article>`).join("");
+
+/* ---------- method ---------- */
+$("#method").innerHTML = [
+  `Source: Olist public Brazilian e-commerce dataset (9 tables, ${fmtInt(D.total_orders)} orders placed ${D.date_range[0]} to ${D.date_range[1]}).`,
+  `Business metrics use the ${fmtInt(D.delivered_orders)} orders with status "delivered". Revenue is total payment value; customers are counted by unique customer ID.`,
+  `Late means delivered after the estimated delivery date. Each order's review score is averaged if it has several reviews.`,
+  `RFM: recency, frequency and spend scored 1–5 by quintile. Champions R≥4 and F/M≥4; Loyal R≥3 and F/M≥3; At Risk R≤2 and F/M≥3; Hibernating R≤2 and F/M<3; New / Promising R≥4 and F/M<3; the rest Need Attention.`,
+  `The monthly chart covers Jan 2017 – Aug 2018; 2016 had too few orders. Recent months may be slightly low because some orders were still in transit.`,
+  `State tiles use five equal-count groups. States with under 500 orders are marked as small samples. The repeat-rate scenario in recommendation 02 is illustrative, not a forecast.`,
+].map((t) => `<li>${t}</li>`).join("");
+
+/* ---------- nav highlight ---------- */
+const navLinks = $$("#navlinks a");
+const secs = navLinks.map((a) => document.querySelector(a.getAttribute("href")));
+function markNav() {
+  const yLine = 120;
+  let cur = -1;
+  secs.forEach((s, i) => { if (s.getBoundingClientRect().top <= yLine) cur = i; });
+  navLinks.forEach((a, i) => a.classList.toggle("active", i === cur));
+}
+window.addEventListener("scroll", markNav, { passive: true });
+
+/* ---------- render ---------- */
+function drawAll() { drawTrend(); drawBuckets(); }
+drawAll(); drawMap(); markNav();
+let rz;
+window.addEventListener("resize", () => { clearTimeout(rz); rz = setTimeout(drawAll, 120); });
 </script>
+
 </body>
 </html>
